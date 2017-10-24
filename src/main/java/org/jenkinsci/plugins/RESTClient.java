@@ -32,7 +32,13 @@ public class RESTClient {
 
     public int createTestRun(TestRun testRun) {
         Response response  = getGivenAuth().body(testRun).with().contentType("application/json").post().andReturn();
-        //todo check status code 201 (or 403,412,500 -> errorMessage)
+        int responseCode = response.statusCode();
+        if (responseCode != 201) {
+            // 403, 412, 500
+            String errorMessage = response.path("errorMessage");
+            throw new RuntimeException("Cannot create new Test Run. Response code: " + responseCode
+                    + ". Message: " + errorMessage);
+        }
         return response.as(TestRun.class).getTestRunId();
     }
 
@@ -42,7 +48,13 @@ public class RESTClient {
 
     public TestCase createTestCase(TestCase testCase) {
         Response response  = getGivenAuth().body(testCase).with().contentType("application/json").post().andReturn();
-        //todo check status code 201 (or 403,412 -> errorMessage)
+        int responseCode = response.statusCode();
+        if (responseCode != 201) {
+            // 403, 412
+            String errorMessage = response.path("errorMessage");
+            throw new RuntimeException("Cannot create new Test Case. Response code: " + responseCode
+                    + ". Message: " + errorMessage);
+        }
         return response.as(TestCase.class);
     }
 }
