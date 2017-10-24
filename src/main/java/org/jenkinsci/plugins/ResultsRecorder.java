@@ -79,11 +79,9 @@ public class ResultsRecorder extends Recorder {
             return FormValidation.ok();
         }
 
-        public FormValidation doCheckUserName(@QueryParameter String value) {
+        public FormValidation doCheckUsername(@QueryParameter String value) {
             if (value.length() == 0) {
                 return FormValidation.error(Messages.FormValidation_EmptyUsername());
-            } else if (value.length() < 3) {
-                return FormValidation.warning(Messages.FormValidation_ShortUsername());
             }
             return FormValidation.ok();
         }
@@ -91,10 +89,7 @@ public class ResultsRecorder extends Recorder {
         public FormValidation doCheckPassword(@QueryParameter String value) {
             if (value.length() == 0) {
                 return FormValidation.error(Messages.FormValidation_EmptyPassword());
-            } else if (value.length() < 3) {
-                return FormValidation.warning(Messages.FormValidation_ShortPassword());
             }
-
             return FormValidation.ok();
         }
     }
