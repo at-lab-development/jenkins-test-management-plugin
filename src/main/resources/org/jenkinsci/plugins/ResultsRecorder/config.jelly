@@ -1,0 +1,17 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+    xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+
+  <f:entry title="Jira Base URL" field="jiraUrl">
+    <f:textbox default="http://jira.epam.com" />
+  </f:entry>
+
+  <f:entry title="Jira Username" field="username">
+    <f:textbox />
+  </f:entry>
+
+  <f:entry title="Jira Password" field="password">
+    <f:password />
+  </f:entry>
+
+</j:jelly>
