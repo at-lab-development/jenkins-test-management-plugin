@@ -2,9 +2,7 @@ package org.jenkinsci.plugins;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.BuildListener;
+import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -13,6 +11,7 @@ import hudson.util.FormValidation;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.IOException;
 import java.io.PrintStream;
 
 public class ResultsRecorder extends Recorder {
@@ -35,11 +34,11 @@ public class ResultsRecorder extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
         PrintStream logger = listener.getLogger();
         logger.println("--------------------------------------------------------");
-        logger.println("----------- Team Management Results Recorder -----------");
-        logger.println("--------------------------------------------------------");
+        TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
+        client.updateTestCaseStatus("EPMFARMATS-829", "Passed");
         return true;
     }
 

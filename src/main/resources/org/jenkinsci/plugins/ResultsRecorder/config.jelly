@@ -3,7 +3,7 @@
     xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 
   <f:entry title="Jira Base URL" field="jiraUrl">
-    <f:textbox default="http://jira.epam.com" />
+    <f:textbox default="https://jira.epam.com" />
   </f:entry>
 
   <f:entry title="Jira Username" field="username">
