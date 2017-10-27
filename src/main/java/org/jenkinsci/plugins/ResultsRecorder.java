@@ -8,9 +8,11 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
+import org.jenkinsci.plugins.util.IssueParser;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
@@ -38,7 +40,10 @@ public class ResultsRecorder extends Recorder {
         PrintStream logger = listener.getLogger();
         logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
-        client.updateTestCaseStatus("EPMFARMATS-829", "Passed");
+        IssueParser issueParser = new IssueParser();
+        client.updateTestCaseStatus(issueParser.getIssues(
+                new File(build.getProject().getSomeWorkspace() + "/target/tm.xml")
+        ));
         return true;
     }
 

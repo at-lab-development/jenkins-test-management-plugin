@@ -7,8 +7,10 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.jenkinsci.plugins.entity.Issue;
 
 import java.io.IOException;
+import java.util.List;
 
 public class TestManagementService {
 
@@ -29,11 +31,11 @@ public class TestManagementService {
         client = HttpClients.createDefault();
     }
 
-    public void updateTestCaseStatus(String testCaseKey, String status) throws IOException {
-        HttpPut put = new HttpPut(baseUrl + "/testcase/" + testCaseKey);
+    public void updateTestCaseStatus(Issue issue) throws IOException {
+        HttpPut put = new HttpPut(baseUrl + "/testcase/" + issue.getIssueKey());
         put.addHeader("Authorization", getAuthorization());
         put.setHeader("Content-type", "application/json");
-        put.setEntity(new StringEntity("{\"status\": \"" + status + "\"}"));
+        put.setEntity(new StringEntity("{\"status\": \"" + issue.getStatus() + "\"}"));
 
         HttpResponse response = client.execute(put);
 
@@ -41,6 +43,12 @@ public class TestManagementService {
         if (responseCode != 204) {
             throw new RuntimeException("Cannot update Test Case status. Response code: " + responseCode
                     + ". Body: " + EntityUtils.toString(response.getEntity(), "UTF-8"));
+        }
+    }
+
+    public void updateTestCaseStatus(List<Issue> issues) throws IOException {
+        for (Issue issue : issues) {
+            updateTestCaseStatus(issue);
         }
     }
 }
