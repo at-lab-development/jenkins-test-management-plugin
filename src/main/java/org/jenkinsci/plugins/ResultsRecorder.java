@@ -42,8 +42,9 @@ public class ResultsRecorder extends Recorder {
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
         IssueParser issueParser = new IssueParser();
         client.updateTestCaseStatus(issueParser.getIssues(
-                new File(build.getProject().getSomeWorkspace() + "/target/tm.xml")
-        ));
+                new File(build.getProject().getSomeWorkspace() + "/target/tm.xml")),
+                listener.getLogger()
+        );
         return true;
     }
 
@@ -78,9 +79,13 @@ public class ResultsRecorder extends Recorder {
         }
 
         public FormValidation doCheckJiraUrl(@QueryParameter String value) {
-            if (!value.matches(HTTP_HTTPS_URL_REGEX))
-                return FormValidation.error(Messages.FormValidation_InvalidUrl());
-            return FormValidation.ok();
+            int status = new TestManagementService(value).checkConnection(value);
+            if (status >= 400) return FormValidation.error("No connection, check your url");
+            switch (status) {
+                case 200 : return FormValidation.ok("Connected");
+                case 0 : return FormValidation.error("Unknown error");
+                default: return FormValidation.error("Unknown error, status code: " + status);
+            }
         }
 
         public FormValidation doCheckUsername(@QueryParameter String value) {

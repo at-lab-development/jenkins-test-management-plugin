@@ -3,6 +3,7 @@ package org.jenkinsci.plugins;
 import hudson.remoting.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
@@ -10,13 +11,15 @@ import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Issue;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.List;
 
 public class TestManagementService {
 
-    private final String TM_API_RELATIVE_PATH = "jira/rest/tm/1.0";
-    private final String username;
-    private final String password;
+    private final String TM_API_RELATIVE_PATH = "rest/tm/1.0";
+    private final String JIRA_PERMISSIONS_RELATIVE_PATH = "rest/api/2/mypermissions";
+    private String username;
+    private String password;
     private String baseUrl;
     HttpClient client;
 
@@ -31,7 +34,13 @@ public class TestManagementService {
         client = HttpClients.createDefault();
     }
 
-    public void updateTestCaseStatus(Issue issue) throws IOException {
+    public TestManagementService(String jiraUrl) {
+        this.baseUrl = jiraUrl;
+        this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
+        client = HttpClients.createDefault();
+    }
+
+    public void updateTestCaseStatus(Issue issue, PrintStream logger) throws IOException {
         HttpPut put = new HttpPut(baseUrl + "/testcase/" + issue.getIssueKey());
         put.addHeader("Authorization", getAuthorization());
         put.setHeader("Content-type", "application/json");
@@ -40,15 +49,31 @@ public class TestManagementService {
         HttpResponse response = client.execute(put);
 
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode != 204) {
-            throw new RuntimeException("Cannot update Test Case status. Response code: " + responseCode
-                    + ". Body: " + EntityUtils.toString(response.getEntity(), "UTF-8"));
+        if (responseCode == 204 )logger.println("Issue status updated: " + issue);
+        else {
+            logger.println("Cannot update Test Case status. Response code: " + responseCode
+                    + ". Check if issue key is valid");
+        }
+
+    }
+
+
+
+    public void updateTestCaseStatus(List<Issue> issues, PrintStream logger) throws IOException {
+        for (Issue issue : issues) {
+            updateTestCaseStatus(issue, logger);
         }
     }
 
-    public void updateTestCaseStatus(List<Issue> issues) throws IOException {
-        for (Issue issue : issues) {
-            updateTestCaseStatus(issue);
+    public int checkConnection(String url)  {
+        String relativeUrl = url + (url.endsWith("/") ? "" : "/") + JIRA_PERMISSIONS_RELATIVE_PATH;
+        HttpGet get = new HttpGet(relativeUrl);
+        try {
+            return client.execute(get).getStatusLine().getStatusCode();
+        } catch (IOException e) {
+            return 0;
         }
     }
+
+
 }
