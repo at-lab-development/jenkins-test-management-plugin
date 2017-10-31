@@ -1,13 +1,23 @@
 package org.jenkinsci.plugins.entity;
 
+import java.io.File;
+
 public class Issue {
 
     private final String issueKey;
     private final String status;
+    private String description;
+    private File file;
 
     public Issue(String issueKey, String result) {
         this.issueKey = issueKey;
         this.status = result;
+    }
+
+    public Issue(String issueKey, String status, String description) {
+        this.issueKey = issueKey;
+        this.status = status;
+        this.description = description;
     }
 
     public String getIssueKey() {
@@ -16,6 +26,22 @@ public class Issue {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public File getFile() {
+        return file;
+    }
+
+    public void setFile(File file) {
+        this.file = file;
     }
 
     @Override
