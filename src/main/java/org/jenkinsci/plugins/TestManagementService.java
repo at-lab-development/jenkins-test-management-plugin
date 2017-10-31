@@ -12,7 +12,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Issue;
 
 import java.io.File;
@@ -24,21 +23,20 @@ public class TestManagementService {
 
     private final String TM_API_RELATIVE_PATH = "rest/tm/1.0";
     private final String JIRA_API_RELATIVE_PATH = "rest/api/2";
-    private final String JIRA_PERMISSIONS_RELATIVE_PATH = "rest/api/2/mypermissions";
+    private final String JIRA_PERMISSIONS_RELATIVE_PATH = JIRA_API_RELATIVE_PATH + "/mypermissions";
     private String username;
     private String password;
     private String baseUrl;
-    HttpClient client;
+    private HttpClient client;
 
     public String getAuthorization() {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
     }
 
     public TestManagementService(String jiraUrl, String username, String password) {
+        this(jiraUrl);
         this.username = username;
         this.password = password;
-        this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
-        client = HttpClients.createDefault();
     }
 
     public TestManagementService(String jiraUrl) {
