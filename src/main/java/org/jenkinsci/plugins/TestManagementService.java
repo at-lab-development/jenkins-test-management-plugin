@@ -55,20 +55,20 @@ public class TestManagementService {
         HttpResponse response = client.execute(put);
 
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode == 204) logger.println("Issue status updated: " + issue);
-        else {
+        if (responseCode == 204)
+            logger.println("Issue status updated: " + issue);
+        else
             logger.println("Cannot update Test Case status. Response code: " + responseCode
                     + ". Check if issue key is valid");
-        }
-
     }
 
     public void attachFile(Issue issue, File file, PrintStream logger) throws IOException {
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
 
-        HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey());
         FileBody fileBody = new FileBody(file);
         HttpEntity entity = MultipartEntityBuilder.create().addPart("file", fileBody).build();
+
+        HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey());
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         post.setHeader("X-Atlassian-Token", "no-check");
         post.setEntity(entity);
@@ -89,8 +89,8 @@ public class TestManagementService {
         }
     }
 
-    public int checkConnection(String url) {
-        String relativeUrl = url + (url.endsWith("/") ? "" : "/") + JIRA_PERMISSIONS_RELATIVE_PATH;
+    public int checkConnection() {
+        String relativeUrl = baseUrl + JIRA_PERMISSIONS_RELATIVE_PATH;
 
         try {
             return client.execute(new HttpGet(relativeUrl)).getStatusLine().getStatusCode();
