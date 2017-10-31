@@ -42,7 +42,6 @@ public class TestManagementService {
     }
 
     public TestManagementService(String jiraUrl) {
-        this.baseUrl = jiraUrl;
         this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
         client = HttpClients.createDefault();
     }
