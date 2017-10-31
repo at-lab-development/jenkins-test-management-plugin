@@ -29,7 +29,7 @@ public class TestManagementService {
     private String baseUrl;
     private HttpClient client;
 
-    public String getAuthorization() {
+    private String getAuthorization() {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
     }
 
@@ -40,12 +40,13 @@ public class TestManagementService {
     }
 
     public TestManagementService(String jiraUrl) {
-        this.baseUrl = jiraUrl;// + (jiraUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
+        this.baseUrl = jiraUrl + (baseUrl.endsWith("/") ? "" : "/");
         client = HttpClients.createDefault();
     }
 
     public void updateTestCaseStatus(Issue issue, PrintStream logger) throws IOException {
-        String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
+        String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
+
         HttpPut put = new HttpPut(relativeUrl + "/testcase/" + issue.getIssueKey());
         put.addHeader("Authorization", getAuthorization());
         put.setHeader("Content-type", "application/json");
@@ -63,15 +64,17 @@ public class TestManagementService {
     }
 
     public void attachFile(Issue issue, File file, PrintStream logger) throws IOException {
-        String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + JIRA_API_RELATIVE_PATH;
-        HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey());
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
 
+        HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey());
         FileBody fileBody = new FileBody(file);
         HttpEntity entity = MultipartEntityBuilder.create().addPart("file", fileBody).build();
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         post.setHeader("X-Atlassian-Token", "no-check");
         post.setEntity(entity);
+
         HttpResponse response = client.execute(post);
+
         int responseCode = response.getStatusLine().getStatusCode();
         if (responseCode == 200)
             logger.println("File " + file.getName() + " has been attached successfully");
@@ -88,9 +91,9 @@ public class TestManagementService {
 
     public int checkConnection(String url) {
         String relativeUrl = url + (url.endsWith("/") ? "" : "/") + JIRA_PERMISSIONS_RELATIVE_PATH;
-        HttpGet get = new HttpGet(relativeUrl);
+
         try {
-            return client.execute(get).getStatusLine().getStatusCode();
+            return client.execute(new HttpGet(relativeUrl)).getStatusLine().getStatusCode();
         } catch (IOException e) {
             return 0;
         }
