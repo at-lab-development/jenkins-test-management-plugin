@@ -40,12 +40,13 @@ public class TestManagementService {
     }
 
     public TestManagementService(String jiraUrl) {
-        this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
+        this.baseUrl = jiraUrl;// + (jiraUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
         client = HttpClients.createDefault();
     }
 
     public void updateTestCaseStatus(Issue issue, PrintStream logger) throws IOException {
-        HttpPut put = new HttpPut(baseUrl + "/testcase/" + issue.getIssueKey());
+        String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + TM_API_RELATIVE_PATH;
+        HttpPut put = new HttpPut(relativeUrl + "/testcase/" + issue.getIssueKey());
         put.addHeader("Authorization", getAuthorization());
         put.setHeader("Content-type", "application/json");
         put.setEntity(new StringEntity("{\"status\": \"" + issue.getStatus() + "\"}"));
@@ -53,7 +54,7 @@ public class TestManagementService {
         HttpResponse response = client.execute(put);
 
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode == 204 )logger.println("Issue status updated: " + issue);
+        if (responseCode == 204) logger.println("Issue status updated: " + issue);
         else {
             logger.println("Cannot update Test Case status. Response code: " + responseCode
                     + ". Check if issue key is valid");
@@ -63,22 +64,20 @@ public class TestManagementService {
 
     public void attachFile(Issue issue, File file, PrintStream logger) throws IOException {
         String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + JIRA_API_RELATIVE_PATH;
-        HttpPost post =  new HttpPost(relativeUrl + "/" + issue.getIssueKey());
+        HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey());
+
         FileBody fileBody = new FileBody(file);
-        HttpEntity entity = MultipartEntityBuilder.create()
-                .addPart("file", fileBody)
-                .build();
+        HttpEntity entity = MultipartEntityBuilder.create().addPart("file", fileBody).build();
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         post.setHeader("X-Atlassian-Token", "no-check");
         post.setEntity(entity);
         HttpResponse response = client.execute(post);
-        if (response.getStatusLine().getStatusCode() == 200) logger.println("File " + file.getName() + "has been attached successfully");
-        else logger.println(
-                "Something wrong with file " + file.getName() + ". Attaching failed. Status code: " +
-                response.getStatusLine().getStatusCode()
-        );
+        int responseCode = response.getStatusLine().getStatusCode();
+        if (responseCode == 200)
+            logger.println("File " + file.getName() + " has been attached successfully");
+        else
+            logger.println("Cannot attach " + file.getName() + " file. Status code: " + responseCode);
     }
-
 
 
     public void updateTestCaseStatus(List<Issue> issues, PrintStream logger) throws IOException {
@@ -87,7 +86,7 @@ public class TestManagementService {
         }
     }
 
-    public int checkConnection(String url)  {
+    public int checkConnection(String url) {
         String relativeUrl = url + (url.endsWith("/") ? "" : "/") + JIRA_PERMISSIONS_RELATIVE_PATH;
         HttpGet get = new HttpGet(relativeUrl);
         try {
