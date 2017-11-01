@@ -79,7 +79,7 @@ public class ResultsRecorder extends Recorder {
         }
 
         public FormValidation doCheckJiraUrl(@QueryParameter String value) {
-            int status = new TestManagementService(value).checkConnection();
+            int status = new TestManagementService().checkConnection(value);
             if (status >= 400) return FormValidation.error("No connection, check your url");
             switch (status) {
                 case 200 : return FormValidation.ok("Connected");

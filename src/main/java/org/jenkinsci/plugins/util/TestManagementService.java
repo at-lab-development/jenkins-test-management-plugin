@@ -29,6 +29,9 @@ public class TestManagementService {
     private String baseUrl;
     private HttpClient client;
 
+    public TestManagementService() {
+    }
+
     public String getAuthorization() {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
     }
