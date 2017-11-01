@@ -42,7 +42,6 @@ public class ResultsRecorder extends Recorder {
         PrintStream logger = listener.getLogger();
         logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
-        IssueParser issueParser = new IssueParser();
         IssuesExecutor executor = new IssuesExecutor(client, logger);
         executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm.xml"));
         return true;
