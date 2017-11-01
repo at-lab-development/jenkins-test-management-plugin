@@ -1,4 +1,4 @@
-package org.jenkinsci.plugins;
+package org.jenkinsci.plugins.util;
 
 import hudson.remoting.Base64;
 import org.apache.http.HttpEntity;
@@ -12,12 +12,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Issue;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestManagementService {
@@ -28,7 +27,7 @@ public class TestManagementService {
     private String username;
     private String password;
     private String baseUrl;
-    HttpClient client;
+    private HttpClient client;
 
     public String getAuthorization() {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
@@ -64,22 +63,53 @@ public class TestManagementService {
 
     }
 
-    public void attachFile(Issue issue, File file, PrintStream logger) throws IOException {
-        String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + JIRA_API_RELATIVE_PATH;
-        HttpPost post =  new HttpPost(relativeUrl + "/" + issue.getIssueKey());
-        FileBody fileBody = new FileBody(file);
-        HttpEntity entity = MultipartEntityBuilder.create()
-                .addPart("file", fileBody)
-                .build();
-        post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
-        post.setHeader("X-Atlassian-Token", "no-check");
-        post.setEntity(entity);
-        HttpResponse response = client.execute(post);
-        if (response.getStatusLine().getStatusCode() == 200) logger.println("File " + file.getName() + "has been attached successfully");
-        else logger.println(
-                "Something wrong with file " + file.getName() + ". Attaching failed. Status code: " +
-                response.getStatusLine().getStatusCode()
-        );
+    public void attach(Issue issue, PrintStream logger) throws IOException {
+        if (issue.getAttachments() != null && !issue.getAttachments().isEmpty()) {
+            String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + JIRA_API_RELATIVE_PATH;
+            HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey() + "/attachments");
+            post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+            post.setHeader("X-Atlassian-Token", "no-check");
+            FileBody fileBody;
+            HttpEntity entity;
+            HttpResponse response;
+            List<HttpResponse> responses = new ArrayList<>();
+            for (String path :
+                    issue.getAttachments()) {
+                fileBody = new FileBody(new File(path));
+                entity = MultipartEntityBuilder.create()
+                        .addPart("file", fileBody)
+                        .build();
+                post.setEntity(entity);
+                response = client.execute(post);
+                if (response.getStatusLine().getStatusCode() == 200)
+                    logger.println("File " + fileBody.getFilename() + "has been attached successfully");
+                else logger.println(
+                        "Something wrong with file " + fileBody.getFilename() + ". Attaching failed. Status code: " +
+                                response.getStatusLine().getStatusCode()
+                );
+            }
+        }
+    }
+
+    public void postComments(Issue issue, PrintStream logger) throws IOException {
+        if (issue.getComments() != null && !issue.getComments().isEmpty()) {
+            String relativeUrl = baseUrl + (baseUrl.endsWith("/") ? "" : "/") + JIRA_API_RELATIVE_PATH;
+            HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey() + "/comment");
+            HttpResponse response;
+            post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+            post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            for (String comment :
+                    issue.getComments()) {
+                StringEntity entity = new StringEntity("{ \"body\": " + "\"[AUTO TM PLUGIN]: " + comment + "\" " + "}");
+                post.setEntity(entity);
+                response = client.execute(post);
+                if (response.getStatusLine().getStatusCode() == 204)
+                    logger.println("comment " + comment + " has been successfully posted");
+                else logger.println(
+                        "Comment post failed. Status code: " + response.getStatusLine().getStatusCode()
+                );
+            }
+        }
     }
 
 

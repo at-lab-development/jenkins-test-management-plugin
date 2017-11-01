@@ -8,7 +8,9 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
-import org.jenkinsci.plugins.util.IssueParser;
+import org.jenkinsci.plugins.parser.IssueParser;
+import org.jenkinsci.plugins.util.IssuesExecutor;
+import org.jenkinsci.plugins.util.TestManagementService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -41,10 +43,8 @@ public class ResultsRecorder extends Recorder {
         logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
         IssueParser issueParser = new IssueParser();
-        client.updateTestCaseStatus(issueParser.getIssues(
-                new File(build.getProject().getSomeWorkspace() + "/target/tm.xml")),
-                listener.getLogger()
-        );
+        IssuesExecutor executor = new IssuesExecutor(client, logger);
+        executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm.xml"));
         return true;
     }
 
