@@ -23,7 +23,6 @@ public class TestManagementService {
 
     private final String TM_API_RELATIVE_PATH = "rest/tm/1.0";
     private final String JIRA_API_RELATIVE_PATH = "rest/api/2";
-    private final String JIRA_PERMISSIONS_RELATIVE_PATH = JIRA_API_RELATIVE_PATH + "/mypermissions";
     private String username;
     private String password;
     private String baseUrl;
@@ -40,7 +39,7 @@ public class TestManagementService {
     }
 
     public TestManagementService(String jiraUrl) {
-        this.baseUrl = jiraUrl + (baseUrl.endsWith("/") ? "" : "/");
+        this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/");
         client = HttpClients.createDefault();
     }
 
@@ -90,7 +89,7 @@ public class TestManagementService {
     }
 
     public int checkConnection() {
-        String relativeUrl = baseUrl + JIRA_PERMISSIONS_RELATIVE_PATH;
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH + "/mypermissions";
 
         try {
             return client.execute(new HttpGet(relativeUrl)).getStatusLine().getStatusCode();
