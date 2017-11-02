@@ -5,12 +5,11 @@ import org.jenkinsci.plugins.entity.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class JiraFormatter {
 
     public enum Color { RED, GRAY, GREEN }
-    private static final String LINE_SEPARATOR = System.lineSeparator();//"\\\\ ";
+    private static final String LINE_SEPARATOR = System.lineSeparator(); // Also we can use "\\\\ ";
 
     public static String bold(String str) {
         return "*" + str + "*";
@@ -58,21 +57,21 @@ public class JiraFormatter {
         return builder.toString();
     }
 
-    public static String createPanel(String title, String content) {
+    private static String createPanel(String title, String content) {
         return String.format("{panel:title=%s|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1}%s{panel}",
                 title, content);
     }
 
-    public static Color chooseColor(String status) {
+    private static Color chooseColor(String status) {
         return status.equals(TestResult.FAILED.toString()) ? Color.RED
                 : status.equals(TestResult.PASSED.toString())  ? Color.GREEN : Color.GRAY;
     }
 
-    public static String extractFileName(String link) {
+    private static String extractFileName(String link) {
         return link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
     }
 
-    public static String replaceLinks(String text, List<String> links) {
+    private static String replaceLinks(String text, List<String> links) {
         String formattedText = text;
         for (String link : links) {
             String fileName = extractFileName(link);
