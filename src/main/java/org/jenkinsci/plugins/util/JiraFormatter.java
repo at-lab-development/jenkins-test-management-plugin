@@ -80,14 +80,18 @@ public class JiraFormatter {
         return formattedText;
     }
 
-    public static String parseIssue (Issue issue) {
+    public static String parseIssue(Issue issue, String buildNumber, String previousStatus) {
         Color statusColor = chooseColor(issue.getStatus());
         String title = "Test Management Plugin Auto-generated Report";
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
 
-        contentBuilder.append(bold("Build:")).append(" no...").append(LINE_SEPARATOR); //todo Build number or sth like that...
-        contentBuilder.append(bold("Status:")).append(" ").append(color(issue.getStatus(), statusColor))
-                .append(LINE_SEPARATOR); //todo check previous status
+        contentBuilder.append(bold("Build:")).append(" ").append(buildNumber).append(LINE_SEPARATOR);
+        contentBuilder.append(bold("Status:")).append(" ");
+
+        if (previousStatus != null && !previousStatus.equalsIgnoreCase(issue.getStatus())) {
+            contentBuilder.append(color(previousStatus, chooseColor(previousStatus))).append(" -> ");
+        }
+        contentBuilder.append(color(issue.getStatus(), statusColor)).append(LINE_SEPARATOR);
 
         if (issue.getSummary() != null) {
             contentBuilder.append(bold("Summary:")).append(" ")
@@ -113,18 +117,9 @@ public class JiraFormatter {
         return createPanel(title, contentBuilder.toString());
     }
 
-    public static void main(String[] args) {
-        List<String> attachs = new ArrayList();
-        attachs.add("/target/stacktrace-TEST-7.txt");
-        attachs.add("/target/scr_819587617750581.png");
-
-        List<Parameter> params = new ArrayList();
-        params.add(new Parameter("Room count", "2"));
-        params.add(new Parameter("Price", "300"));
-
-        Issue issue = new Issue("TTT-111", "Failed", "Failed due to: java.lang.RuntimeException: WTF!. Full stack " +
-                "trace attached as 'stacktrace-TEST-7.txt'. Screenshot attached as 'scr_819587617750581.png'", "7.09 s",
-                attachs, params);
-        System.out.println(parseIssue(issue));
+    public static String parseIssue(Issue issue, String buildNumber) {
+        return parseIssue(issue, buildNumber, null);
     }
+
+
 }
