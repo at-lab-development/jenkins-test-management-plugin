@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins;
 
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Project;
 import hudson.remoting.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -11,7 +14,10 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Issue;
 
 import java.io.File;
@@ -28,21 +34,23 @@ public class TestManagementService {
     private String username;
     private String password;
     private String baseUrl;
-    private HttpClient client;
+    private CloseableHttpClient client;
+    private AbstractBuild<?, ?> build;
 
     private String getAuthorization() {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
     }
 
-    public TestManagementService(String jiraUrl, String username, String password) {
+    public TestManagementService(String jiraUrl, String username, String password, AbstractBuild<?, ?> build) {
         this(jiraUrl);
+        this.build = build;
         this.username = username;
         this.password = password;
     }
 
     public TestManagementService(String jiraUrl) {
         this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/");
-        client = HttpClients.createDefault();
+        client = HttpClientBuilder.create().build();
     }
 
     public void updateTestCaseStatus(Issue issue, PrintStream logger) throws IOException {
@@ -60,7 +68,8 @@ public class TestManagementService {
             logger.println("Issue status updated: " + issue);
         else
             logger.println("Cannot update Test Case status. Response code: " + responseCode
-                    + ". Check if issue key is valid");
+                    + ". Check if issue key is valid") ;
+        put.releaseConnection();
     }
 
     public void attach(Issue issue, PrintStream logger) throws IOException {
@@ -70,23 +79,31 @@ public class TestManagementService {
             post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
             post.setHeader("X-Atlassian-Token", "no-check");
             FileBody fileBody;
+            logger.println(build.getProject().getSomeWorkspace() + issue.getAttachments().get(0));
+
             HttpEntity entity;
             HttpResponse response;
             for (String path :
                     issue.getAttachments()) {
-                fileBody = new FileBody(new File(path));
+                fileBody = new FileBody(new File(build.getProject().getSomeWorkspace() + path));
                 entity = MultipartEntityBuilder.create()
                         .addPart("file", fileBody)
                         .build();
                 post.setEntity(entity);
+
+                logger.println("Starting execute");
+                logger.println(post);
+
                 response = client.execute(post);
                 if (response.getStatusLine().getStatusCode() == 200)
-                    logger.println("File " + fileBody.getFilename() + "has been attached successfully");
+                    logger.println("File: \"" + fileBody.getFilename() + "\" has been attached successfully");
                 else logger.println(
                         "Something wrong with file " + fileBody.getFilename() + ". Attaching failed. Status code: " +
                                 response.getStatusLine().getStatusCode()
                 );
+                post.releaseConnection();
             }
+
         }
     }
 
@@ -104,11 +121,13 @@ public class TestManagementService {
                 post.setEntity(entity);
                 response = client.execute(post);
                 if (response.getStatusLine().getStatusCode() == 201)
-                    logger.println("comment " + comment + " has been successfully posted");
+                    logger.println("Comment: \"" + comment + "\" has been successfully posted");
                 else logger.println(
                         "Comment post failed. Status code: " + response.getStatusLine().getStatusCode()
                 );
+                post.releaseConnection();
             }
+
         }
     }
 

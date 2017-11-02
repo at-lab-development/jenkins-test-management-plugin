@@ -39,7 +39,7 @@ public class ResultsRecorder extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
         PrintStream logger = listener.getLogger();
         logger.println("--------------------------------------------------------");
-        TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
+        TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build);
         IssuesExecutor executor = new IssuesExecutor(client, logger);
         executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml"));
         return true;
