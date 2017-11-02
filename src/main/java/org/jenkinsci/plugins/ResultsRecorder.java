@@ -8,9 +8,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
-import org.jenkinsci.plugins.parser.IssueParser;
 import org.jenkinsci.plugins.util.IssuesExecutor;
-import org.jenkinsci.plugins.util.TestManagementService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -43,7 +41,7 @@ public class ResultsRecorder extends Recorder {
         logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword());
         IssuesExecutor executor = new IssuesExecutor(client, logger);
-        executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm.xml"));
+        executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml"));
         return true;
     }
 
@@ -78,7 +76,7 @@ public class ResultsRecorder extends Recorder {
         }
 
         public FormValidation doCheckJiraUrl(@QueryParameter String value) {
-            int status = new TestManagementService().checkConnection(value);
+            int status = new TestManagementService(value).checkConnection();
             if (status >= 400) return FormValidation.error("No connection, check your url");
             switch (status) {
                 case 200 : return FormValidation.ok("Connected");

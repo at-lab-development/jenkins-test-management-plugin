@@ -17,6 +17,7 @@ import org.jenkinsci.plugins.entity.Issue;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestManagementService {
@@ -40,7 +41,7 @@ public class TestManagementService {
     }
 
     public TestManagementService(String jiraUrl) {
-        this.baseUrl = jiraUrl + (baseUrl.endsWith("/") ? "" : "/");
+        this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/");
         client = HttpClients.createDefault();
     }
 
@@ -62,24 +63,53 @@ public class TestManagementService {
                     + ". Check if issue key is valid");
     }
 
-    public void attachFile(Issue issue, File file, PrintStream logger) throws IOException {
-        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
+    public void attach(Issue issue, PrintStream logger) throws IOException {
+        if (issue.getAttachments() != null && !issue.getAttachments().isEmpty()) {
+            String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
+            HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/attachments");
+            post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+            post.setHeader("X-Atlassian-Token", "no-check");
+            FileBody fileBody;
+            HttpEntity entity;
+            HttpResponse response;
+            for (String path :
+                    issue.getAttachments()) {
+                fileBody = new FileBody(new File(path));
+                entity = MultipartEntityBuilder.create()
+                        .addPart("file", fileBody)
+                        .build();
+                post.setEntity(entity);
+                response = client.execute(post);
+                if (response.getStatusLine().getStatusCode() == 200)
+                    logger.println("File " + fileBody.getFilename() + "has been attached successfully");
+                else logger.println(
+                        "Something wrong with file " + fileBody.getFilename() + ". Attaching failed. Status code: " +
+                                response.getStatusLine().getStatusCode()
+                );
+            }
+        }
+    }
 
-        FileBody fileBody = new FileBody(file);
-        HttpEntity entity = MultipartEntityBuilder.create().addPart("file", fileBody).build();
-
-        HttpPost post = new HttpPost(relativeUrl + "/" + issue.getIssueKey());
-        post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
-        post.setHeader("X-Atlassian-Token", "no-check");
-        post.setEntity(entity);
-
-        HttpResponse response = client.execute(post);
-
-        int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode == 200)
-            logger.println("File " + file.getName() + " has been attached successfully");
-        else
-            logger.println("Cannot attach " + file.getName() + " file. Status code: " + responseCode);
+    public void postComments(Issue issue, PrintStream logger) throws IOException {
+        if (issue.getComments() != null && !issue.getComments().isEmpty()) {
+            String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
+            HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
+            logger.println(relativeUrl + "/issue/" + issue.getIssueKey()+"/comment");
+            HttpResponse response;
+            post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+            post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+            for (String comment :
+                    issue.getComments()) {
+                StringEntity entity = new StringEntity("{ \"body\": " + "\"[AUTO TM PLUGIN]: " + comment + "\" }");
+                post.setEntity(entity);
+                response = client.execute(post);
+                if (response.getStatusLine().getStatusCode() == 201)
+                    logger.println("comment " + comment + " has been successfully posted");
+                else logger.println(
+                        "Comment post failed. Status code: " + response.getStatusLine().getStatusCode()
+                );
+            }
+        }
     }
 
 

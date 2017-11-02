@@ -1,9 +1,8 @@
 package org.jenkinsci.plugins.util;
 
+import org.jenkinsci.plugins.TestManagementService;
 import org.jenkinsci.plugins.entity.Issue;
-import org.jenkinsci.plugins.entity.Issues;
 import org.jenkinsci.plugins.parser.IssueParser;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
