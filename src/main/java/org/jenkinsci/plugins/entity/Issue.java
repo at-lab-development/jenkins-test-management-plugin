@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.entity;
 
 import javax.xml.bind.annotation.*;
-import java.io.File;
 import java.util.List;
 
 @XmlRootElement(name = "test")
@@ -12,26 +11,35 @@ public class Issue {
     private String issueKey;
     @XmlElement(name = "status", required = true)
     private String status;
-    @XmlElementWrapper(name = "comments", nillable = true)
-    @XmlElement(name = "comment", nillable = true)
-    private List<String> comments;
+    @XmlElement(name = "summary")
+    private String summary;
+    @XmlElement(name = "time", required = true)
+    private String time;
     @XmlElementWrapper(name = "attachments", nillable = true)
     @XmlElement(name = "attachment", nillable = true)
     private List<String> attachments;
+    @XmlElementWrapper(name = "parameters", nillable = true)
+    @XmlElement(name = "parameter", nillable = true)
+    private List<Parameter> parameters;
 
-    public Issue(String issueKey, String status) {
+    public Issue(String issueKey, String status, String summary, List<String> attachments, List<Parameter> parameters) {
         this.issueKey = issueKey;
         this.status = status;
-    }
-
-    public Issue(String issueKey, String status, List<String> comments, List<String> attachments) {
-        this.issueKey = issueKey;
-        this.status = status;
-        this.comments = comments;
+        this.summary = summary;
         this.attachments = attachments;
+        this.parameters = parameters;
     }
 
     public Issue() {
+    }
+
+    public Issue(String issueKey, String status, String summary, String time, List<String> attachments, List<Parameter> parameters) {
+        this.issueKey = issueKey;
+        this.status = status;
+        this.summary = summary;
+        this.time = time;
+        this.attachments = attachments;
+        this.parameters = parameters;
     }
 
     public String getIssueKey() {
@@ -50,12 +58,20 @@ public class Issue {
         this.status = status;
     }
 
-    public List<String> getComments() {
-        return comments;
+    public String getSummary() {
+        return summary;
     }
 
-    public void setComments(List<String> comments) {
-        this.comments = comments;
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
     }
 
     public List<String> getAttachments() {
@@ -66,13 +82,49 @@ public class Issue {
         this.attachments = attachments;
     }
 
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Issue issue = (Issue) o;
+
+        if (issueKey != null ? !issueKey.equals(issue.issueKey) : issue.issueKey != null) return false;
+        if (status != null ? !status.equals(issue.status) : issue.status != null) return false;
+        if (summary != null ? !summary.equals(issue.summary) : issue.summary != null) return false;
+        if (time != null ? !time.equals(issue.time) : issue.time != null) return false;
+        if (attachments != null ? !attachments.equals(issue.attachments) : issue.attachments != null) return false;
+        return parameters != null ? parameters.equals(issue.parameters) : issue.parameters == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = issueKey != null ? issueKey.hashCode() : 0;
+        result = 31 * result + (status != null ? status.hashCode() : 0);
+        result = 31 * result + (summary != null ? summary.hashCode() : 0);
+        result = 31 * result + (time != null ? time.hashCode() : 0);
+        result = 31 * result + (attachments != null ? attachments.hashCode() : 0);
+        result = 31 * result + (parameters != null ? parameters.hashCode() : 0);
+        return result;
+    }
+
     @Override
     public String toString() {
         return "Issue{" +
                 "issueKey='" + issueKey + '\'' +
                 ", status='" + status + '\'' +
-                ", comments=" + comments +
+                ", summary='" + summary + '\'' +
+                ", time='" + time + '\'' +
                 ", attachments=" + attachments +
+                ", parameters=" + parameters +
                 '}';
     }
 }
