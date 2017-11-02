@@ -25,8 +25,7 @@ public class JiraFormatter {
 
     /**
      * Returns string representation of two column Jira table created using Jira
-     * Text Formatting Notation:
-     * @link https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
+     * Text Formatting Notation.
      *
      * Example:
      * ||header 1||header 2||
