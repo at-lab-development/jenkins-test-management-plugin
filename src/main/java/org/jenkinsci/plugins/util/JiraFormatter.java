@@ -26,7 +26,6 @@ public class JiraFormatter {
     /**
      * Returns string representation of two column Jira table created using Jira
      * Text Formatting Notation:
-     * @link https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
      *
      * Example:
      * ||header 1||header 2||
@@ -80,7 +79,7 @@ public class JiraFormatter {
         return formattedText;
     }
 
-    public static String parseIssue(Issue issue, String buildNumber, String previousStatus) {
+    public static String parseIssue(Issue issue, int buildNumber, String previousStatus) {
         Color statusColor = chooseColor(issue.getStatus());
         String title = "Test Management Plugin Auto-generated Report";
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
@@ -117,7 +116,7 @@ public class JiraFormatter {
         return createPanel(title, contentBuilder.toString());
     }
 
-    public static String parseIssue(Issue issue, String buildNumber) {
+    public static String parseIssue(Issue issue, int buildNumber) {
         return parseIssue(issue, buildNumber, null);
     }
 

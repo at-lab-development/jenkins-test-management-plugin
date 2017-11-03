@@ -1,13 +1,11 @@
 package org.jenkinsci.plugins;
 
+import com.google.gson.Gson;
 import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Project;
 import hudson.remoting.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -16,14 +14,14 @@ import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Issue;
+import org.jenkinsci.plugins.entity.testmanagement.TMTest;
+import org.jenkinsci.plugins.util.JiraFormatter;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TestManagementService {
@@ -53,7 +51,7 @@ public class TestManagementService {
         client = HttpClientBuilder.create().build();
     }
 
-    public void updateTestCaseStatus(Issue issue, PrintStream logger) throws IOException {
+    public void updateTestStatus(Issue issue, PrintStream logger) throws IOException {
         String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
 
         HttpPut put = new HttpPut(relativeUrl + "/testcase/" + issue.getIssueKey());
@@ -68,7 +66,7 @@ public class TestManagementService {
             logger.println("Issue status updated: " + issue);
         else
             logger.println("Cannot update Test Case status. Response code: " + responseCode
-                    + ". Check if issue key is valid") ;
+                    + ". Check if issue key is valid");
         put.releaseConnection();
     }
 
@@ -79,8 +77,6 @@ public class TestManagementService {
             post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
             post.setHeader("X-Atlassian-Token", "no-check");
             FileBody fileBody;
-            logger.println(build.getProject().getSomeWorkspace() + issue.getAttachments().get(0));
-
             HttpEntity entity;
             HttpResponse response;
             for (String path :
@@ -107,34 +103,30 @@ public class TestManagementService {
         }
     }
 
-    public void postComments(Issue issue, PrintStream logger) throws IOException {
-        if (issue.getComments() != null && !issue.getComments().isEmpty()) {
-            String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
-            HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
-            logger.println(relativeUrl + "/issue/" + issue.getIssueKey()+"/comment");
-            HttpResponse response;
-            post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
-            post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-            for (String comment :
-                    issue.getComments()) {
-                StringEntity entity = new StringEntity("{ \"body\": " + "\"[AUTO TM PLUGIN]: " + comment + "\" }");
-                post.setEntity(entity);
-                response = client.execute(post);
-                if (response.getStatusLine().getStatusCode() == 201)
-                    logger.println("Comment: \"" + comment + "\" has been successfully posted");
-                else logger.println(
-                        "Comment post failed. Status code: " + response.getStatusLine().getStatusCode()
-                );
-                post.releaseConnection();
-            }
-
-        }
+    public void postBuildInfo(Issue issue, PrintStream logger) throws IOException {
+        String commentBody = JiraFormatter.parseIssue(issue, build.number, getTestStatus(issue));
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
+        HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
+        logger.println(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
+        HttpResponse response;
+        post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+        post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+        StringEntity entity = new StringEntity("{ \"body\": " + "\"" +commentBody + "\" }");
+        post.setEntity(entity);
+        response = client.execute(post);
+        if (response.getStatusLine().getStatusCode() == 201)
+            logger.println("Comment: \"" + "\" has been successfully posted");
+        else if (response.getStatusLine().getStatusCode() == 400)
+            logger.println("Comment post failed: missing required fields, invalid values, and so forth");
+        else logger.println(
+                "Comment post failed. Status code: " + response.getStatusLine().getStatusCode()
+        );
+        post.releaseConnection();
     }
 
-
-    public void updateTestCaseStatus(List<Issue> issues, PrintStream logger) throws IOException {
+    public void updateTestStatus(List<Issue> issues, PrintStream logger) throws IOException {
         for (Issue issue : issues) {
-            updateTestCaseStatus(issue, logger);
+            updateTestStatus(issue, logger);
         }
     }
 
@@ -146,6 +138,16 @@ public class TestManagementService {
         } catch (IOException e) {
             return 0;
         }
+    }
+
+    public String getTestStatus(Issue issue) throws IOException {
+        String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
+        HttpGet get = new HttpGet(relativeUrl + "/" +issue.getIssueKey());
+        Gson gson = new Gson();
+        HttpResponse response = client.execute(get);
+        get.releaseConnection();
+        TMTest tmTest = gson.fromJson(EntityUtils.toString(response.getEntity()), TMTest.class);
+        return tmTest.getStatus();
     }
 
 

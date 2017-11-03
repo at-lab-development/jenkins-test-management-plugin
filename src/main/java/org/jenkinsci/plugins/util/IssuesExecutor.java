@@ -22,8 +22,8 @@ public class IssuesExecutor {
         try {
             for (Issue issue :
                     issues) {
-                service.updateTestCaseStatus(issue, logger);
-                service.postComments(issue, logger);
+                service.updateTestStatus(issue, logger);
+                service.postBuildInfo(issue, logger);
                 service.attach(issue, logger);
             }
         } catch (IOException e) {
