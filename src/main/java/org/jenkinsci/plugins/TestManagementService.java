@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import hudson.model.AbstractBuild;
 import hudson.remoting.Base64;
@@ -16,6 +17,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
 import org.jenkinsci.plugins.entity.testmanagement.TMTest;
 import org.jenkinsci.plugins.util.JiraFormatter;
@@ -23,6 +25,7 @@ import org.jenkinsci.plugins.util.JiraFormatter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
 
 public class TestManagementService {
@@ -156,6 +159,17 @@ public class TestManagementService {
         }
         get.releaseConnection();
         return status;
+    }
+
+    public List<Comment> getComments(Issue issue) throws IOException {
+        String relativePath = baseUrl + JIRA_API_RELATIVE_PATH;
+        HttpGet get = new HttpGet(relativePath + "/issue/" + issue.getIssueKey() + "comment");
+        get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+        HttpResponse response = client.execute(get);
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
+        get.releaseConnection();
+        return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));
     }
 
 }
