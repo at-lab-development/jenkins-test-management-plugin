@@ -67,7 +67,9 @@ public class JiraFormatter {
     }
 
     private static String extractFileName(String link) {
-        return link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
+        return link.contains("\\") 
+                ? link.substring(link.lastIndexOf('\\') + 1)
+                : link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
     }
 
     private static String replaceLinks(String text, List<String> links) {
