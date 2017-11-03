@@ -93,8 +93,12 @@ public class JiraFormatter {
         contentBuilder.append(color(issue.getStatus(), statusColor)).append(LINE_SEPARATOR);
 
         if (issue.getSummary() != null) {
-            contentBuilder.append(bold("Summary:")).append(" ")
-                    .append(replaceLinks(issue.getSummary(), issue.getAttachments())).append(LINE_SEPARATOR);
+            contentBuilder.append(bold("Summary:")).append(" ");
+            if (issue.getAttachments() != null) {
+                contentBuilder.append(replaceLinks(issue.getSummary(), issue.getAttachments()));
+            } else
+                contentBuilder.append(issue.getSummary());
+            contentBuilder.append(LINE_SEPARATOR);
         }
 
         if (issue.getTime() != null)
