@@ -9,7 +9,7 @@ import java.util.List;
 public class JiraFormatter {
 
     public enum Color { RED, GRAY, GREEN }
-    private static final String LINE_SEPARATOR = System.lineSeparator(); // Also we can use "\\\\ ";
+    private static final String LINE_SEPARATOR = "\\r";
 
     public static String bold(String str) {
         return "*" + str + "*";
@@ -97,7 +97,8 @@ public class JiraFormatter {
                     .append(replaceLinks(issue.getSummary(), issue.getAttachments())).append(LINE_SEPARATOR);
         }
 
-        contentBuilder.append(bold("Time elapsed:")).append(" ").append(issue.getTime()).append(LINE_SEPARATOR);
+        if (issue.getTime() != null)
+            contentBuilder.append(bold("Time elapsed:")).append(" ").append(issue.getTime()).append(LINE_SEPARATOR);
 
         if (issue.getParameters() != null) {
             contentBuilder.append(LINE_SEPARATOR).append(bold("Parameters")).append(LINE_SEPARATOR)

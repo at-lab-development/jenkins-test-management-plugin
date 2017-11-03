@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import hudson.model.AbstractBuild;
 import hudson.remoting.Base64;
 import org.apache.http.HttpEntity;
@@ -107,7 +108,6 @@ public class TestManagementService {
         String commentBody = JiraFormatter.parseIssue(issue, build.number, getTestStatus(issue));
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
         HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
-        logger.println(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
         HttpResponse response;
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -115,11 +115,12 @@ public class TestManagementService {
         post.setEntity(entity);
         response = client.execute(post);
         if (response.getStatusLine().getStatusCode() == 201)
-            logger.println("Comment: \"" + "\" has been successfully posted");
+            logger.println("Build info has been successfully added to " + issue.getIssueKey() + " comments");
         else if (response.getStatusLine().getStatusCode() == 400)
-            logger.println("Comment post failed: missing required fields, invalid values, and so forth");
+            logger.println("Build info post failed: missing required fields, invalid values." +
+            "Request body: " + EntityUtils.toString(post.getEntity()));
         else logger.println(
-                "Comment post failed. Status code: " + response.getStatusLine().getStatusCode()
+                "Build info post failed. Status code: " + response.getStatusLine().getStatusCode()
         );
         post.releaseConnection();
     }
@@ -141,14 +142,20 @@ public class TestManagementService {
     }
 
     public String getTestStatus(Issue issue) throws IOException {
+        String status = null;
         String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
-        HttpGet get = new HttpGet(relativeUrl + "/" +issue.getIssueKey());
+        HttpGet get = new HttpGet(relativeUrl + "/testcase/" +issue.getIssueKey());
+        get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+        String entityBody = EntityUtils.toString(client.execute(get).getEntity());
         Gson gson = new Gson();
-        HttpResponse response = client.execute(get);
+        try {
+           TMTest tmTest = gson.fromJson(entityBody, TMTest.class);
+           status = tmTest.getStatus();
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+        }
         get.releaseConnection();
-        TMTest tmTest = gson.fromJson(EntityUtils.toString(response.getEntity()), TMTest.class);
-        return tmTest.getStatus();
+        return status;
     }
-
 
 }
