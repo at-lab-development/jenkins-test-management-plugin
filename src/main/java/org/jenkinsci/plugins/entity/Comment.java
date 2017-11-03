@@ -2,18 +2,18 @@ package org.jenkinsci.plugins.entity;
 
 public class Comment {
 
-    private String id;
+    private int id;
     private String created;
     private String body;
 
     public Comment() {
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

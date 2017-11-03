@@ -8,6 +8,7 @@ import hudson.remoting.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -171,5 +172,15 @@ public class TestManagementService {
         get.releaseConnection();
         return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));
     }
+
+    public boolean deleteComment(Issue issue, int id) throws IOException {
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
+        HttpDelete delete = new HttpDelete(relativeUrl+"/ussue/"+issue.getIssueKey()+"/comment/"+id);
+        delete.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+        HttpResponse response = client.execute(delete);
+        if (response.getStatusLine().getStatusCode() == 204) return true;
+        else return false;
+    }
+
 
 }
