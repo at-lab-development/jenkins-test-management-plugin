@@ -5,6 +5,7 @@ import org.jenkinsci.plugins.entity.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class JiraFormatter {
 
@@ -21,6 +22,10 @@ public class JiraFormatter {
 
     public static String attachmentLink(String attachmentName) {
         return "[^" + attachmentName + "]";
+    }
+
+    public static String attachmentLink(String attachmentName, String jiraLink) {
+        return "[" + attachmentName + "|" + jiraLink +"]";
     }
 
     /**
@@ -67,7 +72,7 @@ public class JiraFormatter {
     }
 
     private static String extractFileName(String link) {
-        return link.contains("\\") 
+        return link.contains("\\")
                 ? link.substring(link.lastIndexOf('\\') + 1)
                 : link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
     }
@@ -81,7 +86,7 @@ public class JiraFormatter {
         return formattedText;
     }
 
-    public static String parseIssue(Issue issue, int buildNumber, String previousStatus) {
+    public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
         Color statusColor = chooseColor(issue.getStatus());
         String title = "Test Management Plugin Auto-generated Report";
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
@@ -114,7 +119,9 @@ public class JiraFormatter {
         if (issue.getAttachments() != null) {
             List<Parameter> attachments = new ArrayList<>();
             for (String attachment : issue.getAttachments()) {
-                attachments.add(new Parameter(attachmentLink(extractFileName(attachment)), "system"));
+                String link = filesToJiraLinks.get(attachment);
+                String name = extractFileName(attachment);
+                attachments.add(new Parameter(attachmentLink(name, link), "system"));
             }
             contentBuilder.append(LINE_SEPARATOR).append(bold("Attachments")).append(LINE_SEPARATOR)
                     .append(twoColumnTable("Attachment", "Created by", attachments));
@@ -123,9 +130,7 @@ public class JiraFormatter {
         return createPanel(title, contentBuilder.toString());
     }
 
-    public static String parseIssue(Issue issue, int buildNumber) {
-        return parseIssue(issue, buildNumber, null);
+    public static String parseIssue(Issue issue,  Map<String, String> filesToJiraLinks, int buildNumber) {
+        return parseIssue(issue, filesToJiraLinks, buildNumber, null);
     }
-
-
 }
