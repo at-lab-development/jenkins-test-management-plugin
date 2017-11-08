@@ -35,7 +35,8 @@ public class IssuesExecutor {
                     int oldCommentsDate = Calendar.getInstance().get(Calendar.MONTH)-3;
                     int commentCreationDate = CommentParser.parseCreationMonth(comment.getCreated());
                     //TODO integrate with jenkins values
-                    if (oldCommentsDate <= commentCreationDate) {
+                    if (oldCommentsDate <= commentCreationDate &&
+                            comment.getBody().contains("Test Management Plugin Auto-generated Report")) {
                         service.deleteComment(issue, comment.getId());
                     }
                 }

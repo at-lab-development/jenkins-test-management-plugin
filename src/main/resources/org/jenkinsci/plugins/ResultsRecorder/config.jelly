@@ -18,5 +18,7 @@
     <f:checkbox title="Cleanup old comments" field="cleanup"></f:checkbox>
   </f:entry>
 
-
+    <f:entry field="recipientProviders" title="Recipient Providers">
+        <f:dropdownDescriptorSelector field="issueSelector" title="${%Issue selector}"/>
+    </f:entry>
 </j:jelly>

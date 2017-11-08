@@ -22,13 +22,14 @@ public class ResultsRecorder extends Recorder {
     private final String jiraUrl;
     private final String username;
     private final String password;
-    private boolean cleanup;
+    private final boolean cleanup;
 
     @DataBoundConstructor
-    public ResultsRecorder(String jiraUrl, String username, String password) {
+    public ResultsRecorder(String jiraUrl, String username, String password, boolean cleanup) {
         this.jiraUrl = jiraUrl;
         this.username = username;
         this.password = password;
+        this.cleanup = cleanup;
     }
 
     @Override
