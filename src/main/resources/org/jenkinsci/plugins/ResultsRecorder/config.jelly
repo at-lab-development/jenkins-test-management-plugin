@@ -14,4 +14,9 @@
     <f:password />
   </f:entry>
 
+  <f:entry>
+    <f:checkbox title="Cleanup old comments" field="cleanup"></f:checkbox>
+  </f:entry>
+
+
 </j:jelly>
