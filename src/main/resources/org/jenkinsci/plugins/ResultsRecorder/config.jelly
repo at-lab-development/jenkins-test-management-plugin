@@ -1,24 +1,36 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-    xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 
-  <f:entry title="Jira Base URL" field="jiraUrl">
-    <f:textbox default="https://jira.epam.com" />
-  </f:entry>
-
-  <f:entry title="Jira Username" field="username">
-    <f:textbox />
-  </f:entry>
-
-  <f:entry title="Jira Password" field="password">
-    <f:password />
-  </f:entry>
-
-  <f:entry>
-    <f:checkbox title="Cleanup old comments" field="cleanup"></f:checkbox>
-  </f:entry>
-
-    <f:entry field="recipientProviders" title="Recipient Providers">
-        <f:dropdownDescriptorSelector field="issueSelector" title="${%Issue selector}"/>
+    <f:entry title="Jira Base URL" field="jiraUrl">
+        <f:textbox default="https://jira.epam.com"/>
     </f:entry>
+    <f:block>
+        <table>
+            <f:entry title="Jira Username" field="username">
+                <f:textbox/>
+            </f:entry>
+
+            <f:entry title="Jira Password" field="password">
+                <f:password/>
+            </f:entry>
+        </table>
+    </f:block>
+    <f:advanced>
+        <f:block>
+            <table>
+                <f:optionalBlock name="oldReports" title="Delete old reports">
+                    <f:entry title="Older than">
+                        <f:textbox name="deleteCriteria" value="3"/>
+                        <select name="dateCriteria">
+                            <option value="year">Year</option>
+                            <option value="month">Month</option>
+                            <option value="week">Week</option>
+                            <option value="day">Day</option>
+                        </select>
+                    </f:entry>
+                </f:optionalBlock>
+            </table>
+        </f:block>
+    </f:advanced>
 </j:jelly>

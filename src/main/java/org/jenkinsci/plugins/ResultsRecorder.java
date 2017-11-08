@@ -22,14 +22,16 @@ public class ResultsRecorder extends Recorder {
     private final String jiraUrl;
     private final String username;
     private final String password;
-    private final boolean cleanup;
+    private final String dateCriteria;
+    private final String deleteCriteria;
 
     @DataBoundConstructor
-    public ResultsRecorder(String jiraUrl, String username, String password, boolean cleanup) {
+    public ResultsRecorder(String jiraUrl, String username, String password, String dateCriteria, String deleteCriteria) {
         this.jiraUrl = jiraUrl;
         this.username = username;
         this.password = password;
-        this.cleanup = cleanup;
+        this.dateCriteria = dateCriteria;
+        this.deleteCriteria = deleteCriteria;
     }
 
     @Override
@@ -40,6 +42,8 @@ public class ResultsRecorder extends Recorder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
         PrintStream logger = listener.getLogger();
+        logger.println(dateCriteria);
+        logger.println(deleteCriteria);
         logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build);
         IssuesExecutor executor = new IssuesExecutor(client, logger);
