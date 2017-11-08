@@ -25,11 +25,9 @@ public class IssuesExecutor {
     public void execute(List<Issue> issues) {
         try {
             for (Issue issue : issues) {
-                Map<String, String> fileToJiraLinkMapping;
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
-                service.updateTestStatus(issue, logger);
-                fileToJiraLinkMapping = service.attach(issue, logger);
-                service.postTestResults(issue, fileToJiraLinkMapping, logger);
+                service.postTestResults(issue, logger);
+
                 List<Comment> comments = service.getComments(issue);
                 for (Comment comment : comments) {
                     int oldCommentsDate = Calendar.getInstance().get(Calendar.MONTH)-3;

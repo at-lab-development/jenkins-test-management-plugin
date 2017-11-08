@@ -18,6 +18,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.jenkinsci.plugins.entity.Attachment;
 import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
 import org.jenkinsci.plugins.entity.testmanagement.TMTest;
@@ -48,8 +49,12 @@ public class TestManagementService {
     }
 
     public TestManagementService(String jiraUrl, String username, String password, AbstractBuild<?, ?> build) {
-        this(jiraUrl);
+        this(jiraUrl, username, password);
         this.build = build;
+    }
+
+    public TestManagementService(String jiraUrl, String username, String password) {
+        this(jiraUrl);
         this.username = username;
         this.password = password;
     }
@@ -78,13 +83,6 @@ public class TestManagementService {
         put.releaseConnection();
     }
 
-    //TODO move to utils
-    private static String extractFileName(String link) {
-        return link.contains("\\")
-                ? link.substring(link.lastIndexOf('\\') + 1)
-                : link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
-    }
-
     public Map<String, String> attach(Issue issue, PrintStream logger) throws IOException {
         if (issue.getAttachments() == null || issue.getAttachments().isEmpty())
             return null;
@@ -109,11 +107,13 @@ public class TestManagementService {
             switch (responseCode) {
                 case 200:
                     logger.println("File: \"" + fileBody.getFilename() + "\" has been attached successfully.");
-                    Gson gson = new Gson();
-                    JsonObject jsonObject = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
-                    String id = gson.fromJson(jsonObject.get("id"), String.class);
-                    String jiraAttachmentLink = baseUrl + String.format(ATTACHMENT_URL, id, extractFileName(path));
-                    fileToJiraLinkMapping.put(path, jiraAttachmentLink);
+                    Attachment[] attachments = new Gson().fromJson(EntityUtils.toString(response.getEntity()),
+                            Attachment[].class);
+                    if (attachments.length > 0) {
+                        Attachment attachment = attachments[0];
+                        String link = baseUrl + String.format(ATTACHMENT_URL, attachment.getId(), attachment.getFilename());
+                        fileToJiraLinkMapping.put(path, link);
+                    }
                     break;
                 case 413:
                     logger.println("File: \"" + fileBody.getFilename() + "\" is too big.");
@@ -133,7 +133,10 @@ public class TestManagementService {
     }
 
 
-    public void postTestResults(Issue issue, Map<String, String> filesToJiraLinks, PrintStream logger) throws IOException {
+    public void postTestResults(Issue issue, PrintStream logger) throws IOException {
+        updateTestStatus(issue, logger);
+        Map<String, String> filesToJiraLinks = attach(issue, logger);
+
         String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, build.number, getTestStatus(issue));
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
         HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
@@ -205,11 +208,10 @@ public class TestManagementService {
 
     public boolean deleteComment(Issue issue, int id) throws IOException {
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
-        HttpDelete delete = new HttpDelete(relativeUrl + "/ussue/" + issue.getIssueKey() + "/comment/" + id);
+        HttpDelete delete = new HttpDelete(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment/" + id);
         delete.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(delete);
-        if (response.getStatusLine().getStatusCode() == 204) return true;
-        else return false;
+        return response.getStatusLine().getStatusCode() == 204;
     }
 
 
