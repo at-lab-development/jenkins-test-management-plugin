@@ -34,7 +34,7 @@ public class IssuesExecutor {
                     Date expirationDate = calendar.getTime();
                     for (Comment comment : comments) {
                         if (comment.getCreated().before(expirationDate)) {
-                            if (service.deleteComment(issue.getIssueKey(), comment.getId()))
+                            if (service.removeComment(issue.getIssueKey(), comment.getId()))
                                 logger.println("Old reports has been successfully deleted." +
                                         "Expiration date is" + expirationDate);
                         }

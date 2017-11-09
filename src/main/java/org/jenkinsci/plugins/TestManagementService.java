@@ -234,13 +234,20 @@ public class TestManagementService {
         }
     }
 
-    public boolean deleteComment(String issueKey, int commentId) throws IOException {
+    private boolean removeResource(String urlPart) throws IOException {
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
-        HttpDelete delete = new HttpDelete(relativeUrl + "/issue/" + issueKey + "/comment/" + commentId);
+        HttpDelete delete = new HttpDelete(relativeUrl + urlPart);
         delete.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(delete);
         return response.getStatusLine().getStatusCode() == 204;
     }
 
+    public boolean removeComment(String issueKey, int commentId) throws IOException {
+        return removeResource("/issue/" + issueKey + "/comment/" + commentId);
+    }
+
+    public boolean removeAttachment(int attachmentId) throws IOException {
+        return removeResource("/attachment/" + attachmentId);
+    }
 
 }
