@@ -38,7 +38,7 @@ public class IssuesExecutor {
                         if (comment.getCreated().before(expirationDate)) {
 
                             //Remove all attachments
-                            Pattern orderReferencePattern = Pattern.compile("(?<=secure/attachment/)\\d*(?=/)");
+                            Pattern orderReferencePattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
                             Matcher matcher = orderReferencePattern.matcher(comment.getBody());
                             while (matcher.find()) {
                                 int attachmentId = Integer.valueOf(matcher.group());
