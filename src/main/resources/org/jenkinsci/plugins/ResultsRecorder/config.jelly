@@ -10,27 +10,21 @@
             <f:entry title="Jira Username" field="username">
                 <f:textbox/>
             </f:entry>
-
             <f:entry title="Jira Password" field="password">
                 <f:password/>
             </f:entry>
         </table>
     </f:block>
-    <f:advanced>
-        <f:block>
-            <table>
-                <f:optionalBlock name="oldReports" title="Delete old reports">
-                    <f:entry title="Older than">
-                        <f:textbox name="deleteCriteria" value="3"/>
-                        <select name="dateCriteria">
-                            <option value="year">Year</option>
-                            <option value="month">Month</option>
-                            <option value="week">Week</option>
-                            <option value="day">Day</option>
-                        </select>
-                    </f:entry>
+    <f:block>
+        <table>
+                <f:optionalBlock title="Delete old reports" field="toDelete" checked="${instance.isToDelete()}" inline="true">
+                <f:entry title="Older than" field="deleteCriteria">
+                    <f:textbox default="3"/>
+                </f:entry>
+                <f:entry field="dateCriteria" >
+                    <f:select/>
+                </f:entry>
                 </f:optionalBlock>
-            </table>
-        </f:block>
-    </f:advanced>
+        </table>
+    </f:block>
 </j:jelly>
