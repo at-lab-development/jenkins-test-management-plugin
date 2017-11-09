@@ -22,6 +22,8 @@ public class Issue {
     @XmlElement(name = "parameter", nillable = true)
     private List<Parameter> parameters;
 
+    private List<String> labels;
+
     public Issue(String issueKey, String status, String summary, List<String> attachments, List<Parameter> parameters) {
         this.issueKey = issueKey;
         this.status = status;
@@ -126,5 +128,13 @@ public class Issue {
                 ", attachments=" + attachments +
                 ", parameters=" + parameters +
                 '}';
+    }
+
+    public List<String> getLabels() {
+        return labels;
+    }
+
+    public void setLabels(List<String> labels) {
+        this.labels = labels;
     }
 }
