@@ -28,15 +28,23 @@ public class ResultsRecorder extends Recorder {
     private final String dateCriteria;
     private final String deleteCriteria;
     private final boolean toDelete;
+    private final boolean addLabel;
 
     @DataBoundConstructor
-    public ResultsRecorder(String jiraUrl, String username, String password, String dateCriteria, String deleteCriteria, boolean toDelete) {
+    public ResultsRecorder(String jiraUrl,
+                           String username,
+                           String password,
+                           String dateCriteria,
+                           String deleteCriteria,
+                           boolean toDelete,
+                           boolean addLabel) {
         this.jiraUrl = jiraUrl;
         this.username = username;
         this.password = password;
         this.dateCriteria = dateCriteria;
         this.deleteCriteria = deleteCriteria;
         this.toDelete = toDelete;
+        this.addLabel = addLabel;
     }
 
     @Override
@@ -71,6 +79,10 @@ public class ResultsRecorder extends Recorder {
 
     public String getPassword() {
         return password;
+    }
+
+    public boolean isAddLabel() {
+        return addLabel;
     }
 
     public String getDateCriteria() {
