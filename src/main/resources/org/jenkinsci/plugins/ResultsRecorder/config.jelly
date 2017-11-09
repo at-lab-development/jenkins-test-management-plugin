@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
+<j:jelly xmlns:j="jelly:core"
+         xmlns:f="/lib/form">
 
     <f:entry title="Jira Base URL" field="jiraUrl">
         <f:textbox default="https://jira.epam.com"/>
@@ -17,14 +17,15 @@
     </f:block>
     <f:block>
         <table>
-                <f:optionalBlock title="Delete old reports" field="toDelete" checked="${instance.isToDelete()}" inline="true">
+            <f:optionalBlock title="Delete old reports" field="toDelete" checked="${instance.isToDelete()}"
+                             inline="true">
                 <f:entry title="Older than" field="deleteCriteria">
                     <f:textbox default="3"/>
                 </f:entry>
-                <f:entry field="dateCriteria" >
+                <f:entry field="dateCriteria">
                     <f:select/>
                 </f:entry>
-                </f:optionalBlock>
+            </f:optionalBlock>
             <f:entry field="addLabel">
                 <f:checkbox title="Add labels"/>
             </f:entry>
