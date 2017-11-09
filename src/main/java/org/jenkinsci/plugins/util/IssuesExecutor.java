@@ -24,32 +24,21 @@ public class IssuesExecutor {
     }
 
     public void execute(List<Issue> issues, String deleteCriteria, String dateCriteria) {
+        Date expirationDate = null;
+        if (dateCriteria != null && deleteCriteria != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(DeleteCriteria.parse(dateCriteria), -Integer.parseInt(deleteCriteria));
+            expirationDate = calendar.getTime();
+        }
+
         try {
             for (Issue issue : issues) {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
                 service.postTestResults(issue);
 
                 List<Comment> comments = service.getComments(issue.getIssueKey());
-                Calendar calendar = Calendar.getInstance();
-                if (dateCriteria != null && deleteCriteria != null && comments != null) {
-                    calendar.add(DeleteCriteria.parse(dateCriteria), -Integer.parseInt(deleteCriteria));
-                    Date expirationDate = calendar.getTime();
-                    for (Comment comment : comments) {
-                        if (comment.getCreated().before(expirationDate)) {
-
-                            //Remove all attachments
-                            Pattern attachmentPattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
-                            Matcher matcher = attachmentPattern.matcher(comment.getBody());
-                            while (matcher.find()) {
-                                int attachmentId = Integer.valueOf(matcher.group());
-                                service.removeAttachment(attachmentId);
-                            }
-
-                            if (service.removeComment(issue.getIssueKey(), comment.getId()))
-                                logger.println("Old reports has been successfully deleted." +
-                                        "Expiration date is" + expirationDate);
-                        }
-                    }
+                if (comments != null && expirationDate != null) {
+                    service.removeExpiredComments(issue.getIssueKey(), expirationDate);
                 }
                 logger.println();
             }

@@ -28,10 +28,9 @@ import org.jenkinsci.plugins.util.LabelAction;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TestManagementService {
 
@@ -96,7 +95,7 @@ public class TestManagementService {
     public void manageLabel(String issueKey, String label, LabelAction action) throws IOException {
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
 
-        HttpPut put = new HttpPut(relativeUrl + "/issue/" + issueKey );
+        HttpPut put = new HttpPut(relativeUrl + "/issue/" + issueKey);
         put.addHeader("Authorization", getAuthorization());
         put.setHeader("Content-type", "application/json");
         put.setEntity(new StringEntity("{\"update\": { \"labels\": [ {\"" + action + "\": \"" + label + "\"} ] } }"));
@@ -254,4 +253,25 @@ public class TestManagementService {
         return removeResource("/attachment/" + attachmentId);
     }
 
+    public void removeExpiredComments(String issueKey, Date expirationDate) throws IOException {
+        List<Comment> comments = getComments(issueKey);
+        for (Comment comment : comments) {
+            if (comment.getBody().contains(JiraFormatter.getTitle()) && comment.getCreated().before(expirationDate)) {
+
+                //Remove all attachments
+                Pattern attachmentPattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
+                Matcher matcher = attachmentPattern.matcher(comment.getBody());
+                while (matcher.find()) {
+                    int attachmentId = Integer.valueOf(matcher.group());
+                    if (removeAttachment(attachmentId))
+                        logger.println("Attachment with id = " + attachmentId + " was successfully removed.");
+                }
+
+                int commentId = comment.getId();
+                if (removeComment(issueKey, commentId))
+                    logger.println("Comment with id = " + commentId + " was successfully removed.");
+            }
+        }
+
+    }
 }
