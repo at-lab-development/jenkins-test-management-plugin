@@ -1,19 +1,21 @@
 package org.jenkinsci.plugins.util;
 
+import java.util.Calendar;
+
 public class DeleteCriteria {
 
     public static int parse(String criteria) {
         switch (criteria) {
             case ("Month"):
-                return 2;
+                return Calendar.MONTH;
             case ("Year"):
-                return 1;
+                return Calendar.YEAR;
             case ("Week"):
-                return 3;
+                return Calendar.WEEK_OF_YEAR;
             case ("Day"):
-                return 5;
+                return Calendar.DATE;
             default:
-                return 2;
+                return Calendar.MONTH;
         }
     }
 
