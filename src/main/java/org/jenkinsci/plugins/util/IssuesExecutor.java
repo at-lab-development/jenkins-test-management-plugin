@@ -28,7 +28,7 @@ public class IssuesExecutor {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
                 service.postTestResults(issue, logger);
 
-                List<Comment> comments = service.getComments(issue);
+                List<Comment> comments = service.getComments(issue.getIssueKey());
                 for (Comment comment : comments) {
                     int oldCommentsDate = Calendar.getInstance().get(Calendar.MONTH)-3;
                     int commentCreationDate = CommentParser.parseCreationMonth(comment.getCreated());

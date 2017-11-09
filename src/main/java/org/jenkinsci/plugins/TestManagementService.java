@@ -220,9 +220,9 @@ public class TestManagementService {
         return status;
     }
 
-    public List<Comment> getComments(Issue issue) throws IOException {
+    public List<Comment> getComments(String issueKey) throws IOException {
         String relativePath = baseUrl + JIRA_API_RELATIVE_PATH;
-        HttpGet get = new HttpGet(relativePath + "/issue/" + issue.getIssueKey() + "/comment");
+        HttpGet get = new HttpGet(relativePath + "/issue/" + issueKey + "/comment");
         get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(get);
         Gson gson = new Gson();
