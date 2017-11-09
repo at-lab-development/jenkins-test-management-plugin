@@ -168,7 +168,7 @@ public class TestManagementService {
     public void postTestResults(Issue issue, PrintStream logger) throws IOException {
         updateTestStatus(issue, logger);
         Map<String, String> filesToJiraLinks = attach(issue, logger);
-        String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, getTestStatus(issue));
+        String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, getTestStatus(issue.getIssueKey()));
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
         HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
@@ -203,10 +203,10 @@ public class TestManagementService {
         }
     }
 
-    private String getTestStatus(Issue issue) throws IOException {
+    private String getTestStatus(String issueKey) throws IOException {
         String status = null;
         String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
-        HttpGet get = new HttpGet(relativeUrl + "/testcase/" + issue.getIssueKey());
+        HttpGet get = new HttpGet(relativeUrl + "/testcase/" + issueKey);
         get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         String entityBody = EntityUtils.toString(client.execute(get).getEntity());
         Gson gson = new Gson();
