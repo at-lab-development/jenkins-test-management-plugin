@@ -231,9 +231,9 @@ public class TestManagementService {
         return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));//TODO NullPointer EX
     }
 
-    public boolean deleteComment(Issue issue, int id) throws IOException {
+    public boolean deleteComment(String issueKey, int commentId) throws IOException {
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
-        HttpDelete delete = new HttpDelete(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment/" + id);
+        HttpDelete delete = new HttpDelete(relativeUrl + "/issue/" + issueKey + "/comment/" + commentId);
         delete.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(delete);
         return response.getStatusLine().getStatusCode() == 204;
