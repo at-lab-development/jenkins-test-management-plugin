@@ -3,19 +3,17 @@ package org.jenkinsci.plugins.util;
 import org.jenkinsci.plugins.TestManagementService;
 import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
-import org.jenkinsci.plugins.parser.CommentParser;
 import org.jenkinsci.plugins.parser.IssueParser;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class IssuesExecutor {
     private TestManagementService service;
     private PrintStream logger;
-    private List<Issue> issues;
 
     public IssuesExecutor(TestManagementService service, PrintStream stream) {
         this.service = service;
@@ -28,14 +26,14 @@ public class IssuesExecutor {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
                 service.postTestResults(issue, logger);
 
-                List<Comment> comments = service.getComments(issue);
+                List<Comment> comments = service.getComments(issue.getIssueKey());
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(new Date());
+                calendar.add(Calendar.DATE, -3);  //todo synch with jenkins settings
+                Date expirationDate = calendar.getTime();
                 for (Comment comment : comments) {
-                    int oldCommentsDate = Calendar.getInstance().get(Calendar.MONTH)-3;
-                    int commentCreationDate = CommentParser.parseCreationMonth(comment.getCreated());
-                    //TODO integrate with jenkins values
-                    if (oldCommentsDate <= commentCreationDate &&
-                            comment.getBody().contains("Test Management Plugin Auto-generated Report")) {
-                        service.deleteComment(issue, comment.getId());
+                    if (comment.getCreated().before(expirationDate)) {
+                        service.deleteComment(issue.getIssueKey(), comment.getId());
                     }
                 }
                 logger.println();
@@ -47,8 +45,7 @@ public class IssuesExecutor {
 
     public void execute(File file) {
         IssueParser parser = new IssueParser();
-        issues = parser.getIssues(file);
-        execute(issues);
+        execute(parser.getIssues(file));
     }
 
 

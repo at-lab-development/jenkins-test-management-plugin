@@ -29,8 +29,8 @@ public class JiraFormatter {
     }
 
     /**
-     * Returns string representation of two column Jira table created using Jira
-     * Text Formatting Notation:
+     * Returns string representation of two column Jira table created using Jira Text
+     * Formatting Notation:
      *
      * Example:
      * ||header 1||header 2||

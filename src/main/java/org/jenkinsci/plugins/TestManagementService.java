@@ -23,6 +23,7 @@ import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
 import org.jenkinsci.plugins.entity.testmanagement.TMTest;
 import org.jenkinsci.plugins.util.JiraFormatter;
+import org.jenkinsci.plugins.util.LabelAction;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,27 +37,32 @@ public class TestManagementService {
 
     private final String TM_API_RELATIVE_PATH = "rest/tm/1.0";
     private final String JIRA_API_RELATIVE_PATH = "rest/api/2";
-    private final String JIRA_PERMISSIONS_RELATIVE_PATH = JIRA_API_RELATIVE_PATH + "/mypermissions";
     private final String ATTACHMENT_URL = "secure/attachment/%s/%s";
     private String username;
     private String password;
     private String baseUrl;
     private CloseableHttpClient client;
-    private AbstractBuild<?, ?> build;
+    private int buildNumber;
+    private String workspace;
 
     private String getAuthorization() {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
     }
 
     public TestManagementService(String jiraUrl, String username, String password, AbstractBuild<?, ?> build) {
-        this(jiraUrl, username, password);
-        this.build = build;
+        this(jiraUrl);
+        this.username = username;
+        this.password = password;
+        this.buildNumber = build.number;
+        this.workspace = build.getProject().getSomeWorkspace().getRemote();
     }
 
     public TestManagementService(String jiraUrl, String username, String password) {
         this(jiraUrl);
         this.username = username;
         this.password = password;
+        this.workspace = System.getProperty("user.dir");
+        this.buildNumber = 1;
     }
 
     public TestManagementService(String jiraUrl) {
@@ -64,7 +70,7 @@ public class TestManagementService {
         client = HttpClientBuilder.create().build();
     }
 
-    public void updateTestStatus(Issue issue, PrintStream logger) throws IOException {
+    private void updateTestStatus(Issue issue, PrintStream logger) throws IOException {
         String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
 
         HttpPut put = new HttpPut(relativeUrl + "/testcase/" + issue.getIssueKey());
@@ -83,7 +89,33 @@ public class TestManagementService {
         put.releaseConnection();
     }
 
-    public Map<String, String> attach(Issue issue, PrintStream logger) throws IOException {
+    public void manageLabel(String issueKey, String label, LabelAction action, PrintStream logger) throws IOException {
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
+
+        HttpPut put = new HttpPut(relativeUrl + "/issue/" + issueKey );
+        put.addHeader("Authorization", getAuthorization());
+        put.setHeader("Content-type", "application/json");
+        put.setEntity(new StringEntity("{\"update\": { \"labels\": [ {\"" + action + "\": \"" + label + "\"} ] } }"));
+
+        HttpResponse response = client.execute(put);
+
+        int responseCode = response.getStatusLine().getStatusCode();
+        switch (responseCode) {
+            case 204:
+                logger.println("Successfully " + action + " label \"" + label + " " + action.getPreposition()
+                        + " issue " + issueKey);
+                break;
+            default:
+                logger.println("Cannot " + action + " label \"" + label + "\" " + action.getPreposition()
+                        + " issue " + issueKey + ". Response code: " + responseCode + ". Reason: "
+                        + response.getStatusLine().getReasonPhrase());
+        }
+
+        put.releaseConnection();
+    }
+
+
+    private Map<String, String> attach(Issue issue, PrintStream logger) throws IOException {
         if (issue.getAttachments() == null || issue.getAttachments().isEmpty())
             return null;
 
@@ -94,7 +126,7 @@ public class TestManagementService {
         post.setHeader("X-Atlassian-Token", "no-check");
 
         for (String path : issue.getAttachments()) {
-            FileBody fileBody = new FileBody(new File(build.getProject().getSomeWorkspace() + path));
+            FileBody fileBody = new FileBody(new File(workspace + path));
             HttpEntity entity = MultipartEntityBuilder.create()
                     .addPart("file", fileBody)
                     .build();
@@ -132,12 +164,10 @@ public class TestManagementService {
         return fileToJiraLinkMapping;
     }
 
-
     public void postTestResults(Issue issue, PrintStream logger) throws IOException {
         updateTestStatus(issue, logger);
         Map<String, String> filesToJiraLinks = attach(issue, logger);
-
-        String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, build.number, getTestStatus(issue));
+        String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, getTestStatus(issue.getIssueKey()));
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
         HttpPost post = new HttpPost(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment");
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
@@ -162,14 +192,8 @@ public class TestManagementService {
         post.releaseConnection();
     }
 
-    public void updateTestStatus(List<Issue> issues, PrintStream logger) throws IOException {
-        for (Issue issue : issues) {
-            updateTestStatus(issue, logger);
-        }
-    }
-
-    public int checkConnection() {
-        String relativeUrl = baseUrl + JIRA_PERMISSIONS_RELATIVE_PATH;
+    int checkConnection() {
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH + "/mypermissions";
 
         try {
             return client.execute(new HttpGet(relativeUrl)).getStatusLine().getStatusCode();
@@ -178,10 +202,10 @@ public class TestManagementService {
         }
     }
 
-    public String getTestStatus(Issue issue) throws IOException {
+    private String getTestStatus(String issueKey) throws IOException {
         String status = null;
         String relativeUrl = baseUrl + TM_API_RELATIVE_PATH;
-        HttpGet get = new HttpGet(relativeUrl + "/testcase/" + issue.getIssueKey());
+        HttpGet get = new HttpGet(relativeUrl + "/testcase/" + issueKey);
         get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         String entityBody = EntityUtils.toString(client.execute(get).getEntity());
         Gson gson = new Gson();
@@ -195,9 +219,9 @@ public class TestManagementService {
         return status;
     }
 
-    public List<Comment> getComments(Issue issue) throws IOException {
+    public List<Comment> getComments(String issueKey) throws IOException {
         String relativePath = baseUrl + JIRA_API_RELATIVE_PATH;
-        HttpGet get = new HttpGet(relativePath + "/issue/" + issue.getIssueKey() + "/comment");
+        HttpGet get = new HttpGet(relativePath + "/issue/" + issueKey + "/comment");
         get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(get);
         Gson gson = new Gson();
@@ -206,9 +230,9 @@ public class TestManagementService {
         return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));//TODO NullPointer EX
     }
 
-    public boolean deleteComment(Issue issue, int id) throws IOException {
+    public boolean deleteComment(String issueKey, int commentId) throws IOException {
         String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH;
-        HttpDelete delete = new HttpDelete(relativeUrl + "/issue/" + issue.getIssueKey() + "/comment/" + id);
+        HttpDelete delete = new HttpDelete(relativeUrl + "/issue/" + issueKey + "/comment/" + commentId);
         delete.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(delete);
         return response.getStatusLine().getStatusCode() == 204;
