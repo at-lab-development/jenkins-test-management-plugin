@@ -29,6 +29,7 @@ import org.jenkinsci.plugins.util.LabelAction;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -113,18 +114,16 @@ public class TestManagementService {
         HttpResponse response = client.execute(put);
 
         int responseCode = response.getStatusLine().getStatusCode();
-        switch (responseCode) {
-            case 204:
-                logger.println("Successfully " + action + " label \"" + label + " " + action.getPreposition()
-                        + " issue " + issueKey);
-                break;
-            default:
-                logger.println("Cannot " + action + " label \"" + label + "\" " + action.getPreposition()
-                        + " issue " + issueKey + ". Response code: " + responseCode + ". Reason: "
-                        + response.getStatusLine().getReasonPhrase());
+        if (responseCode == 204 && action.equals(LabelAction.ADD)) {
+            logger.println("Add label \"" + label + "\" to issue " + issueKey);
         }
 
         put.releaseConnection();
+    }
+
+    private String getLabelForDate(Date date) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        return "build_" + formatter.format(date);
     }
 
 
@@ -177,7 +176,7 @@ public class TestManagementService {
         return fileToJiraLinkMapping;
     }
 
-    public void postTestResults(Issue issue) throws IOException {
+    public void postTestResults(Issue issue, boolean addLabel) throws IOException {
         updateTestStatus(issue.getIssueKey(), issue.getStatus());
         Map<String, String> filesToJiraLinks = attach(issue);
         String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, getTestStatus(issue.getIssueKey()));
@@ -194,6 +193,8 @@ public class TestManagementService {
             case 201:
                 logger.println("Test execution results for issue " + issue.getIssueKey() + " were successfully " +
                         "attached as comment.");
+                if (addLabel)
+                    manageLabel(issue.getIssueKey(), getLabelForDate(new Date()), LabelAction.ADD);
                 break;
             case 400:
                 logger.println("Cannot attach test results: input is invalid (e.g. missing required fields, invalid " +
@@ -276,6 +277,9 @@ public class TestManagementService {
                     if (removeAttachment(attachmentId))
                         logger.println("Attachment with id = " + attachmentId + " was successfully removed.");
                 }
+
+                //Remove label
+                manageLabel(issueKey, getLabelForDate(comment.getCreated()), LabelAction.REMOVE);
 
                 int commentId = comment.getId();
                 if (removeComment(issueKey, commentId))

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 public class ResultsRecorder extends Recorder {
-    private static final String HTTP_HTTPS_URL_REGEX = "^https?://.*";
 
     private final String jiraUrl;
     private final String username;
@@ -60,7 +59,8 @@ public class ResultsRecorder extends Recorder {
         logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build, logger);
         IssuesExecutor executor = new IssuesExecutor(client, logger);
-        executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml"), deleteCriteria, dateCriteria);
+        File xml = new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml");
+        executor.execute(xml, deleteCriteria, dateCriteria, isAddLabel());
         return true;
     }
 
