@@ -266,6 +266,8 @@ public class TestManagementService {
 
     public void removeExpiredComments(String issueKey, Date expirationDate) throws IOException {
         List<Comment> comments = getComments(issueKey);
+        int commentCounter = 0;
+        int attachmentCounter = 0;
         for (Comment comment : comments) {
             if (comment.getBody().contains(JiraFormatter.getTitle()) && comment.getCreated().before(expirationDate)) {
 
@@ -274,18 +276,21 @@ public class TestManagementService {
                 Matcher matcher = attachmentPattern.matcher(comment.getBody());
                 while (matcher.find()) {
                     int attachmentId = Integer.valueOf(matcher.group());
-                    if (removeAttachment(attachmentId))
-                        logger.println("Attachment with id = " + attachmentId + " was successfully removed.");
+                    if (removeAttachment(attachmentId)) attachmentCounter++;
                 }
 
                 //Remove label
                 manageLabel(issueKey, getLabelForDate(comment.getCreated()), LabelAction.REMOVE);
 
-                int commentId = comment.getId();
-                if (removeComment(issueKey, commentId))
-                    logger.println("Comment with id = " + commentId + " was successfully removed.");
+                if (removeComment(issueKey, comment.getId())) commentCounter++;
             }
         }
 
+        if (commentCounter > 0) {
+            logger.print(commentCounter + " expired comments ");
+            if (attachmentCounter > 0)
+                logger.print("with " + attachmentCounter + " attachments ");
+            logger.println("were removed.");
+        }
     }
 }
