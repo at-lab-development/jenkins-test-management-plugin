@@ -14,7 +14,6 @@ import java.util.List;
 public class IssuesExecutor {
     private TestManagementService service;
     private PrintStream logger;
-    private List<Issue> issues;
 
     public IssuesExecutor(TestManagementService service, PrintStream stream) {
         this.service = service;
@@ -46,8 +45,7 @@ public class IssuesExecutor {
 
     public void execute(File file) {
         IssueParser parser = new IssueParser();
-        issues = parser.getIssues(file);
-        execute(issues);
+        execute(parser.getIssues(file));
     }
 
 
