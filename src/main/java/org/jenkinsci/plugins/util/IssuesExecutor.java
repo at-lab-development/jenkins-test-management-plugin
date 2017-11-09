@@ -4,6 +4,7 @@ import org.jenkinsci.plugins.TestManagementService;
 import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
 import org.jenkinsci.plugins.parser.IssueParser;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -20,7 +21,7 @@ public class IssuesExecutor {
         this.logger = stream;
     }
 
-    public void execute(List<Issue> issues) {
+    public void execute(List<Issue> issues, String deleteCriteria, String dateCriteria) {
         try {
             for (Issue issue : issues) {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
@@ -28,12 +29,15 @@ public class IssuesExecutor {
 
                 List<Comment> comments = service.getComments(issue.getIssueKey());
                 Calendar calendar = Calendar.getInstance();
-                calendar.setTime(new Date());
-                calendar.add(Calendar.DATE, -3);  //todo synch with jenkins settings
-                Date expirationDate = calendar.getTime();
-                for (Comment comment : comments) {
-                    if (comment.getCreated().before(expirationDate)) {
-                        service.deleteComment(issue.getIssueKey(), comment.getId());
+                if (dateCriteria != null && deleteCriteria != null && comments != null) {
+                    calendar.add(DeleteCriteria.parse(dateCriteria), -Integer.parseInt(deleteCriteria));
+                    Date expirationDate = calendar.getTime();
+                    for (Comment comment : comments) {
+                        if (comment.getCreated().before(expirationDate)) {
+                            if (service.deleteComment(issue.getIssueKey(), comment.getId()))
+                                logger.println("Old reports has been successfully deleted." +
+                                        "Expiration date is" + expirationDate);
+                        }
                     }
                 }
                 logger.println();
@@ -43,9 +47,9 @@ public class IssuesExecutor {
         }
     }
 
-    public void execute(File file) {
+    public void execute(File file, String deleteCriteria, String dateCriteria) {
         IssueParser parser = new IssueParser();
-        execute(parser.getIssues(file));
+        execute(parser.getIssues(file), deleteCriteria, dateCriteria);
     }
 
 

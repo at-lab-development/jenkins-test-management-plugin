@@ -227,7 +227,11 @@ public class TestManagementService {
         Gson gson = new Gson();
         JsonObject jsonObject = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
         get.releaseConnection();
-        return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));//TODO NullPointer EX
+        try {
+            return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
     public boolean deleteComment(String issueKey, int commentId) throws IOException {
