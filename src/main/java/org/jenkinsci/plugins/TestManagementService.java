@@ -8,6 +8,7 @@ import hudson.remoting.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -37,6 +38,8 @@ public class TestManagementService {
     private final String TM_API_RELATIVE_PATH = "rest/tm/1.0";
     private final String JIRA_API_RELATIVE_PATH = "rest/api/2";
     private final String ATTACHMENT_URL = "secure/attachment/%s/%s";
+    private final int HTTP_CLIENT_TIMEOUT_SECONDS = 15;
+
     private String username;
     private String password;
     private String baseUrl;
@@ -70,7 +73,14 @@ public class TestManagementService {
 
     public TestManagementService(String jiraUrl) {
         this.baseUrl = jiraUrl + (jiraUrl.endsWith("/") ? "" : "/");
-        client = HttpClientBuilder.create().build();
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(HTTP_CLIENT_TIMEOUT_SECONDS * 1000)
+                .setConnectionRequestTimeout(HTTP_CLIENT_TIMEOUT_SECONDS * 1000)
+                .setSocketTimeout(HTTP_CLIENT_TIMEOUT_SECONDS * 1000)
+                .build();
+        client = HttpClientBuilder.create()
+                .setDefaultRequestConfig(config)
+                .build();
     }
 
     public void updateTestStatus(String issueKey, String status) throws IOException {

@@ -11,8 +11,6 @@ import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class IssuesExecutor {
     private TestManagementService service;
@@ -27,7 +25,7 @@ public class IssuesExecutor {
         Date expirationDate = null;
         if (dateCriteria != null && deleteCriteria != null) {
             Calendar calendar = Calendar.getInstance();
-            calendar.add(DeleteCriteria.parse(dateCriteria), -Integer.parseInt(deleteCriteria));
+            calendar.add(Integer.valueOf(dateCriteria), -Integer.parseInt(deleteCriteria));
             expirationDate = calendar.getTime();
         }
 
