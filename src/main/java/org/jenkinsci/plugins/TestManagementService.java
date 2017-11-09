@@ -42,7 +42,6 @@ public class TestManagementService {
     private String password;
     private String baseUrl;
     private CloseableHttpClient client;
-    //private AbstractBuild<?, ?> build;
     private int buildNumber;
     private String workspace;
 
