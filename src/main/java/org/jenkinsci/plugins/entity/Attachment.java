@@ -1,9 +1,7 @@
 package org.jenkinsci.plugins.entity;
 
-/**
- * Created by Alena_Zubrevich on 11/8/2017.
- */
 public class Attachment {
+
     private int id;
     private String filename;
 
