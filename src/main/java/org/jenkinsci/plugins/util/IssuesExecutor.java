@@ -27,7 +27,7 @@ public class IssuesExecutor {
         try {
             for (Issue issue : issues) {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
-                service.postTestResults(issue, logger);
+                service.postTestResults(issue);
 
                 List<Comment> comments = service.getComments(issue.getIssueKey());
                 Calendar calendar = Calendar.getInstance();

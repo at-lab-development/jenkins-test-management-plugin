@@ -50,7 +50,7 @@ public class ResultsRecorder extends Recorder {
         logger.println(dateCriteria);
         logger.println(deleteCriteria);
         logger.println("--------------------------------------------------------");
-        TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build);
+        TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build, logger);
         IssuesExecutor executor = new IssuesExecutor(client, logger);
         executor.execute(new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml"), deleteCriteria, dateCriteria);
         return true;
