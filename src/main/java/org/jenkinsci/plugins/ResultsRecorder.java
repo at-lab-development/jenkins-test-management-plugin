@@ -96,7 +96,9 @@ public class ResultsRecorder extends Recorder {
             items.add("Year", "1");
             items.add("Month", "2");
             items.add("Week", "3");
-            items.add("Day", "4");
+            items.add("Day", "5");
+            items.add("Hour", "10");
+            items.add("Minute", "12");
             return items;
         }
 

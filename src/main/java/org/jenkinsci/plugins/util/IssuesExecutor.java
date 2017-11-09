@@ -32,22 +32,26 @@ public class IssuesExecutor {
                 List<Comment> comments = service.getComments(issue.getIssueKey());
                 Calendar calendar = Calendar.getInstance();
                 if (dateCriteria != null && deleteCriteria != null && comments != null) {
-                    calendar.add(DeleteCriteria.parse(dateCriteria), -Integer.parseInt(deleteCriteria));
+                    calendar.add(Integer.parseInt(dateCriteria), -Integer.parseInt(deleteCriteria));
                     Date expirationDate = calendar.getTime();
                     for (Comment comment : comments) {
                         if (comment.getCreated().before(expirationDate)) {
+
+                            if (service.removeComment(issue.getIssueKey(), comment.getId()))
+                                logger.println("Old report has been successfully deleted." +
+                                        "Created in " + comment.getCreated() +
+                                        ". Expired date is " + expirationDate);
 
                             //Remove all attachments
                             Pattern orderReferencePattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
                             Matcher matcher = orderReferencePattern.matcher(comment.getBody());
                             while (matcher.find()) {
                                 int attachmentId = Integer.valueOf(matcher.group());
-                                service.removeAttachment(attachmentId);
+                                if (service.removeAttachment(attachmentId)) {
+                                    logger.println("Attachment has been removed successfully");
+                                }
                             }
 
-                            if (service.removeComment(issue.getIssueKey(), comment.getId()))
-                                logger.println("Old reports has been successfully deleted." +
-                                        "Expiration date is" + expirationDate);
                         }
                     }
                 }
