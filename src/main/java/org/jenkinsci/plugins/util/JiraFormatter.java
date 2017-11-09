@@ -11,6 +11,7 @@ public class JiraFormatter {
 
     public enum Color { RED, GRAY, GREEN }
     private static final String LINE_SEPARATOR = "\\r";
+    private static final String TITLE = "Test Management Plugin Auto-generated Report";
 
     public static String bold(String str) {
         return "*" + str + "*";
@@ -88,7 +89,6 @@ public class JiraFormatter {
 
     public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
         Color statusColor = chooseColor(issue.getStatus());
-        String title = "Test Management Plugin Auto-generated Report";
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
 
         contentBuilder.append(bold("Build:")).append(" ").append(buildNumber).append(LINE_SEPARATOR);
@@ -127,10 +127,14 @@ public class JiraFormatter {
                     .append(twoColumnTable("Attachment", "Created by", attachments));
         }
 
-        return createPanel(title, contentBuilder.toString());
+        return createPanel(TITLE, contentBuilder.toString());
     }
 
     public static String parseIssue(Issue issue,  Map<String, String> filesToJiraLinks, int buildNumber) {
         return parseIssue(issue, filesToJiraLinks, buildNumber, null);
+    }
+
+    public static String getTitle() {
+        return TITLE;
     }
 }

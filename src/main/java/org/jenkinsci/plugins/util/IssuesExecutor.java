@@ -11,8 +11,6 @@ import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class IssuesExecutor {
     private TestManagementService service;
@@ -24,36 +22,21 @@ public class IssuesExecutor {
     }
 
     public void execute(List<Issue> issues, String deleteCriteria, String dateCriteria) {
+        Date expirationDate = null;
+        if (dateCriteria != null && deleteCriteria != null) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Integer.valueOf(dateCriteria), -Integer.parseInt(deleteCriteria));
+            expirationDate = calendar.getTime();
+        }
+
         try {
             for (Issue issue : issues) {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
-                service.postTestResults(issue, logger);
+                service.postTestResults(issue);
 
                 List<Comment> comments = service.getComments(issue.getIssueKey());
-                Calendar calendar = Calendar.getInstance();
-                if (dateCriteria != null && deleteCriteria != null && comments != null) {
-                    calendar.add(Integer.parseInt(dateCriteria), -Integer.parseInt(deleteCriteria));
-                    Date expirationDate = calendar.getTime();
-                    for (Comment comment : comments) {
-                        if (comment.getCreated().before(expirationDate)) {
-
-                            if (service.removeComment(issue.getIssueKey(), comment.getId()))
-                                logger.println("Old report has been successfully deleted." +
-                                        "Created in " + comment.getCreated() +
-                                        ". Expired date is " + expirationDate);
-
-                            //Remove all attachments
-                            Pattern orderReferencePattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
-                            Matcher matcher = orderReferencePattern.matcher(comment.getBody());
-                            while (matcher.find()) {
-                                int attachmentId = Integer.valueOf(matcher.group());
-                                if (service.removeAttachment(attachmentId)) {
-                                    logger.println("Attachment has been removed successfully");
-                                }
-                            }
-
-                        }
-                    }
+                if (comments != null && expirationDate != null) {
+                    service.removeExpiredComments(issue.getIssueKey(), expirationDate);
                 }
                 logger.println();
             }
