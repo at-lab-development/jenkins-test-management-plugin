@@ -88,7 +88,7 @@ public class JiraFormatter {
     }
 
     private static String replaceLineSeparator(String text) {
-        return text.replaceAll("\n", LINE_SEPARATOR);
+        return text.replace("\n", LINE_SEPARATOR);
     }
 
     public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
