@@ -87,6 +87,10 @@ public class JiraFormatter {
         return formattedText;
     }
 
+    private static String replaceLineSeparator(String text) {
+        return text.replaceAll(System.lineSeparator(), LINE_SEPARATOR);
+    }
+
     public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
         Color statusColor = chooseColor(issue.getStatus());
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
@@ -101,10 +105,11 @@ public class JiraFormatter {
 
         if (issue.getSummary() != null) {
             contentBuilder.append(bold("Summary:")).append(" ");
+            String summary = replaceLineSeparator(issue.getSummary());
             if (issue.getAttachments() != null) {
-                contentBuilder.append(replaceLinks(issue.getSummary(), issue.getAttachments()));
+                contentBuilder.append(replaceLinks(summary, issue.getAttachments()));
             } else
-                contentBuilder.append(issue.getSummary());
+                contentBuilder.append(summary);
             contentBuilder.append(LINE_SEPARATOR);
         }
 
