@@ -19,6 +19,7 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.apache.tools.ant.taskdefs.condition.Http;
 import org.jenkinsci.plugins.entity.Attachment;
 import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
@@ -50,6 +51,10 @@ public class TestManagementService {
     private PrintStream logger;
 
     private String getAuthorization() {
+        return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
+    }
+
+    private String getAuthorization(String username, String password) {
         return "Basic ".concat(Base64.encode(username.concat(":").concat(password).getBytes()));
     }
 
@@ -192,13 +197,15 @@ public class TestManagementService {
         switch (responseCode) {
             case 201:
                 logger.println("Test execution results for issue " + issue.getIssueKey() + " were successfully " +
-                        "attached as comment.");
+                        "attached as comment.\nIssue link: " +
+                        relativeUrl + "/issue/" + issue.getIssueKey());
                 if (addLabel)
                     manageLabel(issue.getIssueKey(), getLabelForDate(new Date()), LabelAction.ADD);
+
                 break;
             case 400:
                 logger.println("Cannot attach test results: input is invalid (e.g. missing required fields, invalid " +
-                        "values, and so forth). Request body: " + EntityUtils.toString(post.getEntity()));
+                        "values, and so forth)");
                 break;
             default:
                 logger.println("Cannot attach test results. Status code: " + responseCode);
@@ -207,10 +214,12 @@ public class TestManagementService {
     }
 
     int checkConnection() {
-        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH + "/mypermissions";
+        String relativeUrl = baseUrl + JIRA_API_RELATIVE_PATH + "/myself";
 
         try {
-            return client.execute(new HttpGet(relativeUrl)).getStatusLine().getStatusCode();
+            HttpGet get = new HttpGet(relativeUrl);
+            get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
+            return client.execute(get).getStatusLine().getStatusCode();
         } catch (IOException e) {
             return 0;
         }

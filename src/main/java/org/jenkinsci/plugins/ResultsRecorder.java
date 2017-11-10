@@ -54,9 +54,6 @@ public class ResultsRecorder extends Recorder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
         PrintStream logger = listener.getLogger();
-        logger.println(dateCriteria);
-        logger.println(deleteCriteria);
-        logger.println("--------------------------------------------------------");
         TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build, logger);
         IssuesExecutor executor = new IssuesExecutor(client, logger);
         File xml = new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml");
@@ -101,7 +98,9 @@ public class ResultsRecorder extends Recorder {
 
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-        boolean toDelete;
+        private String jiraUrl;
+        private String user;
+        private String password;
 
         public ListBoxModel doFillDateCriteriaItems() {
             ListBoxModel items = new ListBoxModel();
@@ -112,17 +111,6 @@ public class ResultsRecorder extends Recorder {
             items.add("Hour", "10");
             items.add("Minute", "12");
             return items;
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            JSONObject jsonObject = json.getJSONObject("toDelete");
-            if (jsonObject != null && !jsonObject.isNullObject()) {
-                toDelete = true;
-            }
-            else toDelete=false;
-            save();
-            return super.configure(req, json);
         }
 
         public DescriptorImpl() {
@@ -140,17 +128,25 @@ public class ResultsRecorder extends Recorder {
         }
 
 
-        public FormValidation doCheckJiraUrl(@QueryParameter String value) {
-            int status = new TestManagementService(value).checkConnection();
-            if (status >= 400) return FormValidation.error("No connection, check your url");
+        public FormValidation doTestConnection() {
+            int status = new TestManagementService(jiraUrl, user, password).checkConnection();
             switch (status) {
-                case 200 : return FormValidation.ok("Connected");
-                case 0 : return FormValidation.error("Unknown error");
+                case 200 : return FormValidation.ok("Success");
+                case 500 : return FormValidation.warning("Internal Server Error, check credentials");
+                case 401 : return FormValidation.warning("Authorization failed");
+                case 404 : return FormValidation.error("Not found, check URL");
+                case 0 : return FormValidation.error("Critical error");
                 default: return FormValidation.error("Unknown error, status code: " + status);
             }
         }
 
+        public FormValidation doCheckJiraUrl(@QueryParameter String value) {
+            jiraUrl = value;
+            return FormValidation.ok();
+        }
+
         public FormValidation doCheckUsername(@QueryParameter String value) {
+            user = value;
             if (value.length() == 0) {
                 return FormValidation.error(Messages.FormValidation_EmptyUsername());
             }
@@ -158,6 +154,7 @@ public class ResultsRecorder extends Recorder {
         }
 
         public FormValidation doCheckPassword(@QueryParameter String value) {
+            password = value;
             if (value.length() == 0) {
                 return FormValidation.error(Messages.FormValidation_EmptyPassword());
             }
