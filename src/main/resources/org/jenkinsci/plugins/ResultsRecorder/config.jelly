@@ -2,32 +2,36 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
 
-    <f:entry title="Jira Base URL" field="jiraUrl">
+    <f:entry title="Jira Base URL" field="jiraUrl" help="/plugin/test-management/help-base-url.html">
         <f:textbox default="https://jira.epam.com"/>
     </f:entry>
     <f:block>
-        <table>
-            <f:entry title="Jira Username" field="username">
-                <f:textbox/>
-            </f:entry>
-            <f:entry title="Jira Password" field="password">
-                <f:password/>
-            </f:entry>
-        </table>
+        <f:entry title="Jira Username" field="username">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Jira Password" field="password">
+            <f:password/>
+        </f:entry>
+        <f:validateButton
+                title="${%Test Connection}" progress="${%Connecting...}"
+                method="testConnection" with="secretKey,accessId"/>
     </f:block>
-    <f:block>
-        <table>
-                <f:optionalBlock title="Delete old reports" field="toDelete" checked="${instance.isToDelete()}" inline="true">
-                <f:entry title="Older than" field="deleteCriteria">
-                    <f:textbox default="3"/>
-                </f:entry>
-                <f:entry field="dateCriteria" >
-                    <f:select/>
-                </f:entry>
+    <f:advanced>
+        <f:block>
+            <table width="100%">
+                <f:optionalBlock title="Add labels" field="addLabel" checked="${instance.isAddLabel()}"
+                                 inline="true">
                 </f:optionalBlock>
-            <f:entry field="addLabel">
-                <f:checkbox title="Add labels"/>
-            </f:entry>
-        </table>
-    </f:block>
+                <f:optionalBlock title="Delete old reports" field="toDelete" checked="${instance.isToDelete()}"
+                                 inline="true">
+                    <f:entry title="Older than" field="deleteCriteria">
+                        <f:textbox default="3"/>
+                    </f:entry>
+                    <f:entry field="dateCriteria">
+                        <f:select/>
+                    </f:entry>
+                </f:optionalBlock>
+            </table>
+        </f:block>
+    </f:advanced>
 </j:jelly>
