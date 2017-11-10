@@ -121,7 +121,8 @@ public class JiraFormatter {
             for (String attachment : issue.getAttachments()) {
                 String link = filesToJiraLinks.get(attachment);
                 String name = extractFileName(attachment);
-                attachments.add(new Parameter(attachmentLink(name, link), "system"));
+                boolean system = name.matches("(?:stacktrace|scr).\\d{4}-\\d{2}-\\d{2}T.*");
+                attachments.add(new Parameter(attachmentLink(name, link), system ? "system" : "user"));
             }
             contentBuilder.append(LINE_SEPARATOR).append(bold("Attachments")).append(LINE_SEPARATOR)
                     .append(twoColumnTable("Attachment", "Created by", attachments));

@@ -2,19 +2,13 @@ package org.jenkinsci.plugins.util;
 
 public enum LabelAction {
 
-    ADD("add", "to"),
-    REMOVE("remove", "from");
+    ADD("add"),
+    REMOVE("remove");
 
     private String text;
-    private String preposition;
 
-    LabelAction(final String text, final String preposition) {
+    LabelAction(final String text) {
         this.text = text;
-        this.preposition = preposition;
-    }
-
-    public String getPreposition() {
-        return preposition;
     }
 
     @Override
