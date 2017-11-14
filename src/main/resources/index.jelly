@@ -1,4 +1,9 @@
 <?jelly escape-by-default='true'?>
 <div>
-    TOD
+    This plugin updates issues annotated with @JiraTestKey using Test Management and Jira API possibilities.
+    Basically the way it works is that the plugin changes Test (issue) status, add corresponding label
+    (optional) and leaves basic build information and useful artifacts (titled values, file links) as issue
+    comments. Stack traces, screenshots, user added files are attached to issue with adding their links to Report.
+    In addition, you can take advantage of clean-up function for expired comments and related to them attachments
+    or labels.
 </div>
