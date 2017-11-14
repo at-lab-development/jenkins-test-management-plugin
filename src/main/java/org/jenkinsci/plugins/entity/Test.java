@@ -1,5 +1,8 @@
-package org.jenkinsci.plugins.entity.testmanagement;
+package org.jenkinsci.plugins.entity;
 
+/**
+ * The entity for Test Case entity (Test Management plugin)
+ */
 public class Test {
 
     private int id;
