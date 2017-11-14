@@ -2,24 +2,24 @@ package org.jenkinsci.plugins.util;
 
 public enum TestResult {
 
-    FAILED("Failed", JiraFormatter.Color.RED),
-    PASSED("Passed", JiraFormatter.Color.GREEN),
-    BLOCKED("Blocked", JiraFormatter.Color.GRAY),
-    UNTESTED("Untested", JiraFormatter.Color.GRAY);
+    FAILED("Failed", "red"),
+    PASSED("Passed", "green"),
+    BLOCKED("Blocked", "gray"),
+    UNTESTED("Untested", "gray");
 
     private final String text;
-    private final JiraFormatter.Color color;
+    private final String color;
 
-    TestResult(final String text, JiraFormatter.Color color) {
+    TestResult(final String text, String color) {
         this.text = text;
         this.color = color;
     }
 
-    private JiraFormatter.Color getColor() {
+    private String getColor() {
         return color;
     }
 
-    public static JiraFormatter.Color getColor(String value) {
+    public static String getColor(String value) {
         return valueOf(TestResult.class, value.toUpperCase()).getColor();
     }
 

@@ -15,8 +15,6 @@ import java.util.Map;
  * @author      Alena Zubrevich
  */
 public class JiraFormatter {
-
-    public enum Color { RED, GRAY, GREEN }
     private static final String LINE_SEPARATOR = "\\r";
     private static final String TITLE = "Test Management Plugin Auto-generated Report";
 
@@ -38,8 +36,8 @@ public class JiraFormatter {
      * @param color the value of Color enum
      * @return formatted text
      */
-    private static String color(String str, Color color) {
-        return String.format("{color:%s}%s{color}", color.toString().toLowerCase(), str);
+    private static String color(String str, String color) {
+        return String.format("{color:%s}%s{color}", color, str);
     }
 
     /**
@@ -120,7 +118,7 @@ public class JiraFormatter {
      * @return test representation of issue in accordance with Jira Text Formatting Notation
      */
     public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
-        Color statusColor = TestResult.getColor(issue.getStatus());
+        String statusColor = TestResult.getColor(issue.getStatus());
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
 
         contentBuilder.append(strong("Build:")).append(" ").append(buildNumber).append(LINE_SEPARATOR);
