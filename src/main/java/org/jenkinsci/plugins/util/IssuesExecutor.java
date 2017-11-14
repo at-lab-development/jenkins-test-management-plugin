@@ -1,10 +1,12 @@
 package org.jenkinsci.plugins.util;
 
-import org.jenkinsci.plugins.TestManagementService;
-import org.jenkinsci.plugins.entity.Comment;
+import org.jenkinsci.plugins.api.TestManagementService;
 import org.jenkinsci.plugins.entity.Issue;
-import org.jenkinsci.plugins.parser.IssueParser;
+import org.jenkinsci.plugins.entity.Issues;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -12,13 +14,31 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * IssuesExecutor is a basic class responsible for issues parsing, execution
+ * and publishing.
+ *
+ * @author      Uladzimir Pryhazhanau
+ */
 public class IssuesExecutor {
     private TestManagementService service;
     private PrintStream logger;
 
-    public IssuesExecutor(TestManagementService service, PrintStream stream) {
+    public IssuesExecutor(TestManagementService service, PrintStream logger) {
         this.service = service;
-        this.logger = stream;
+        this.logger = logger;
+    }
+
+    private List<Issue> parse(File xmlFile) {
+        List<Issue> issues = null;
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(Issues.class);
+            Unmarshaller u = jaxbContext.createUnmarshaller();
+            issues = ((Issues) u.unmarshal(xmlFile)).getIssues();
+        } catch (JAXBException e) {
+            logger.println("Cannot read file: " + xmlFile.getPath() + ". Reason: " + e.getMessage());
+        }
+        return issues;
     }
 
     public void execute(List<Issue> issues, String deleteCriteria, String dateCriteria, boolean addLabel) {
@@ -33,22 +53,15 @@ public class IssuesExecutor {
             for (Issue issue : issues) {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
                 service.postTestResults(issue, addLabel);
-
-                List<Comment> comments = service.getComments(issue.getIssueKey());
-                if (comments != null && expirationDate != null) {
-                    service.removeExpiredComments(issue.getIssueKey(), expirationDate);
-                }
+                if (expirationDate != null) service.removeExpiredComments(issue.getIssueKey(), expirationDate);
                 logger.println();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.println(e.getMessage());
         }
     }
 
     public void execute(File file, String deleteCriteria, String dateCriteria, boolean addLabel) {
-        IssueParser parser = new IssueParser();
-        execute(parser.getIssues(file), deleteCriteria, dateCriteria, addLabel);
+        execute(parse(file), deleteCriteria, dateCriteria, addLabel);
     }
-
-
 }

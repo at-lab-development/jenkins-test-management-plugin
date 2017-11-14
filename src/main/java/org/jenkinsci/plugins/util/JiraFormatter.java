@@ -7,41 +7,76 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * JiraFormatter is a class responsible for formatting issues according to Jira
+ * Text Formatting Notation for their further publishing as Jira Issue comments
+ * in a readable format.
+ *
+ * @author      Alena Zubrevich
+ */
 public class JiraFormatter {
 
     public enum Color { RED, GRAY, GREEN }
     private static final String LINE_SEPARATOR = "\\r";
     private static final String TITLE = "Test Management Plugin Auto-generated Report";
 
-    public static String bold(String str) {
+    /**
+     * Makes text strong (bold)
+     * Example: *strong*
+     * @param str text for processing
+     * @return formatted text
+     */
+    public static String strong(String str) {
         return "*" + str + "*";
     }
 
+    /**
+     * Changes the color of a block of text.
+     * Example: {color:red}look ma, red text!{color}
+     *
+     * @param str text for processing
+     * @param color the value of Color enum
+     * @return formatted text
+     */
     public static String color(String str, Color color) {
         return String.format("{color:%s}%s{color}", color.toString().toLowerCase(), str);
     }
 
-    public static String attachmentLink(String attachmentName) {
+    /**
+     * Having the '^' followed by the name of an attachment will lead into a link
+     * to the last current issue attachment with such a name. It's useful for files
+     * with unique name (for instance, if they have timestamp in their name).
+     * Example: [^attachment.ext]
+     * @param attachmentName the exact name of attached file
+     * @return attachment name formatted as link
+     */
+    private static String attachmentLink(String attachmentName) {
         return "[^" + attachmentName + "]";
     }
 
-    public static String attachmentLink(String attachmentName, String jiraLink) {
+    /**
+     * Creates a link to a resource, this allows us to create links to different
+     * attachments with exact name
+     * Example: [attachment.ext|https://jira.epam.com/jira/secure/attachment/{issue-key}/attachment.ext]
+     * @param attachmentName the exact name of attached file
+     * @param jiraLink the link to issue attachment
+     *
+     * @return attachment name formatted as link
+     */
+    private static String attachmentLink(String attachmentName, String jiraLink) {
         return "[" + attachmentName + "|" + jiraLink +"]";
     }
 
     /**
-     * Returns string representation of two column Jira table created using Jira Text
-     * Formatting Notation:
-     *
-     * Example:
-     * ||header 1||header 2||
-     * |col A1|col A2|
-     * |col B1|col B2|
+     * Returns string representation of two column Jira table with a header row.
+     * Example: ||header 1||header 2||
+     *          |column A1 |column A2|
+     *          |column B1 |column B2|
      *
      * @param  heading1 first column header
      * @param  heading2 second column header
      * @param  params the list of values with titles (title will be put in the first column)
-     * @return      string with formatted table
+     * @return string with formatted table
      */
     public static String twoColumnTable(String heading1, String heading2, List<Parameter> params) {
         final String TITLE_SEPARATOR = "||";
@@ -62,6 +97,14 @@ public class JiraFormatter {
         return builder.toString();
     }
 
+    /**
+     * Embraces a block of text within a fully customizable panel. At this time
+     * this panel has all configuration options set by default, but this options
+     * might be implemented as custlater (borderStyle, borderColor, borderWidth, bgColor, titleBGColor)
+     * @param title
+     * @param content
+     * @return
+     */
     private static String createPanel(String title, String content) {
         return String.format("{panel:title=%s|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1}%s{panel}",
                 title, content);
@@ -95,8 +138,8 @@ public class JiraFormatter {
         Color statusColor = chooseColor(issue.getStatus());
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
 
-        contentBuilder.append(bold("Build:")).append(" ").append(buildNumber).append(LINE_SEPARATOR);
-        contentBuilder.append(bold("Status:")).append(" ");
+        contentBuilder.append(strong("Build:")).append(" ").append(buildNumber).append(LINE_SEPARATOR);
+        contentBuilder.append(strong("Status:")).append(" ");
 
         if (previousStatus != null && !previousStatus.equalsIgnoreCase(issue.getStatus())) {
             contentBuilder.append(color(previousStatus, chooseColor(previousStatus))).append(" -> ");
@@ -104,7 +147,7 @@ public class JiraFormatter {
         contentBuilder.append(color(issue.getStatus(), statusColor)).append(LINE_SEPARATOR);
 
         if (issue.getSummary() != null) {
-            contentBuilder.append(bold("Summary:")).append(" ");
+            contentBuilder.append(strong("Summary:")).append(" ");
             String summary = replaceLineSeparator(issue.getSummary());
             if (issue.getAttachments() != null) {
                 contentBuilder.append(replaceLinks(summary, issue.getAttachments()));
@@ -114,10 +157,10 @@ public class JiraFormatter {
         }
 
         if (issue.getTime() != null)
-            contentBuilder.append(bold("Time elapsed:")).append(" ").append(issue.getTime()).append(LINE_SEPARATOR);
+            contentBuilder.append(strong("Time elapsed:")).append(" ").append(issue.getTime()).append(LINE_SEPARATOR);
 
         if (issue.getParameters() != null) {
-            contentBuilder.append(LINE_SEPARATOR).append(bold("Parameters")).append(LINE_SEPARATOR)
+            contentBuilder.append(LINE_SEPARATOR).append(strong("Parameters")).append(LINE_SEPARATOR)
                     .append(twoColumnTable("Title", "Value", issue.getParameters()));
         }
 
@@ -129,7 +172,7 @@ public class JiraFormatter {
                 boolean system = name.matches("(?:stacktrace|scr).\\d{4}-\\d{2}-\\d{2}T.*");
                 attachments.add(new Parameter(attachmentLink(name, link), system ? "system" : "user"));
             }
-            contentBuilder.append(LINE_SEPARATOR).append(bold("Attachments")).append(LINE_SEPARATOR)
+            contentBuilder.append(LINE_SEPARATOR).append(strong("Attachments")).append(LINE_SEPARATOR)
                     .append(twoColumnTable("Attachment", "Created by", attachments));
         }
 

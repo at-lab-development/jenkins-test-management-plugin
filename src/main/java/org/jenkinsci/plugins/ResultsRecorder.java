@@ -2,18 +2,19 @@ package org.jenkinsci.plugins;
 
 import hudson.Extension;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.api.TestManagementService;
 import org.jenkinsci.plugins.util.IssuesExecutor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,11 +54,13 @@ public class ResultsRecorder extends Recorder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
+        TestManagementService service;
         PrintStream logger = listener.getLogger();
-        TestManagementService client = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), build, logger);
-        IssuesExecutor executor = new IssuesExecutor(client, logger);
-        File xml = new File(build.getProject().getSomeWorkspace() + "/target/tm-testng.xml");
-        executor.execute(xml, deleteCriteria, dateCriteria, isAddLabel());
+        String workspace = build.getProject().getSomeWorkspace().getRemote();
+        File xml = new File(workspace + "/target/tm-testng.xml");
+
+        service = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), workspace, build.number, logger);
+        new IssuesExecutor(service, logger).execute(xml, deleteCriteria, dateCriteria, isAddLabel());
         return true;
     }
 
@@ -95,7 +98,6 @@ public class ResultsRecorder extends Recorder {
     }
 
 
-
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private String jiraUrl;
@@ -114,7 +116,7 @@ public class ResultsRecorder extends Recorder {
         }
 
         public DescriptorImpl() {
-           load();
+            load();
         }
 
         @Override
@@ -129,14 +131,20 @@ public class ResultsRecorder extends Recorder {
 
 
         public FormValidation doTestConnection() {
-            int status = new TestManagementService(jiraUrl, user, password).checkConnection();
+            int status = TestManagementService.checkConnection(jiraUrl, user, password);
             switch (status) {
-                case 200 : return FormValidation.ok("Success");
-                case 500 : return FormValidation.warning("Internal Server Error, check credentials");
-                case 401 : return FormValidation.warning("Authorization failed");
-                case 404 : return FormValidation.error("Not found, check URL");
-                case 0 : return FormValidation.error("Critical error");
-                default: return FormValidation.error("Unknown error, status code: " + status);
+                case 200:
+                    return FormValidation.ok("Success");
+                case 500:
+                    return FormValidation.warning("Internal Server Error, check credentials");
+                case 401:
+                    return FormValidation.warning("Authorization failed");
+                case 404:
+                    return FormValidation.error("Not found, check URL");
+                case 0:
+                    return FormValidation.error("Critical error");
+                default:
+                    return FormValidation.error("Unknown error, status code: " + status);
             }
         }
 
@@ -147,18 +155,16 @@ public class ResultsRecorder extends Recorder {
 
         public FormValidation doCheckUsername(@QueryParameter String value) {
             user = value;
-            if (value.length() == 0) {
-                return FormValidation.error(Messages.FormValidation_EmptyUsername());
-            }
-            return FormValidation.ok();
+            return (value.length() == 0)
+                    ? FormValidation.error(Messages.FormValidation_EmptyUsername())
+                    : FormValidation.ok();
         }
 
         public FormValidation doCheckPassword(@QueryParameter String value) {
             password = value;
-            if (value.length() == 0) {
-                return FormValidation.error(Messages.FormValidation_EmptyPassword());
-            }
-            return FormValidation.ok();
+            return (value.length() == 0)
+                    ? FormValidation.error(Messages.FormValidation_EmptyPassword())
+                    : FormValidation.ok();
         }
     }
 }

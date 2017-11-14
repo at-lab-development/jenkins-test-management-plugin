@@ -1,20 +1,20 @@
 package org.jenkinsci.plugins.entity.testmanagement;
 
-public class TMTest {
+public class Test {
 
     private int id;
     private String status;
     private String steps;
     private String expectedResult;
 
-    public TMTest(int id, String status, String steps, String expectedResult) {
+    public Test(int id, String status, String steps, String expectedResult) {
         this.id = id;
         this.status = status;
         this.steps = steps;
         this.expectedResult = expectedResult;
     }
 
-    public TMTest() {
+    public Test() {
     }
 
     public int getId() {
@@ -51,7 +51,7 @@ public class TMTest {
 
     @Override
     public String toString() {
-        return "TMTest{" +
+        return "Test{" +
                 "id=" + id +
                 ", status='" + status + '\'' +
                 ", steps='" + steps + '\'' +
