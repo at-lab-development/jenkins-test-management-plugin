@@ -20,7 +20,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Attachment;
 import org.jenkinsci.plugins.entity.Comment;
-import org.jenkinsci.plugins.entity.testmanagement.Test;
+import org.jenkinsci.plugins.entity.Test;
 import org.jenkinsci.plugins.util.LabelAction;
 
 import java.io.File;
@@ -36,8 +36,8 @@ import java.util.*;
  * methods using Test Management API, but this methods may be moved to separate class
  * with the increase of JIRA REST API functionality afforded by this class.
  *
- * @author      Uladzimir Pryhazhanau
- * @author      Alena Zubrevich
+ * @author Uladzimir Pryhazhanau
+ * @author Alena Zubrevich
  */
 class JiraService {
     private final static String JIRA_API_RELATIVE_PATH = "rest/api/2";
@@ -69,6 +69,8 @@ class JiraService {
         client = HttpClientBuilder.create().setDefaultRequestConfig(config).build();
     }
 
+    // Auxiliary methods
+
     private static String formBaseUrl(String rawJiraUrl) {
         return rawJiraUrl + (rawJiraUrl.endsWith("/") ? "" : "/");
     }
@@ -90,6 +92,8 @@ class JiraService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
         return "build_" + formatter.format(date);
     }
+
+    // Test Management methods
 
     String getTestStatus(String issueKey) throws IOException {
         HttpGet get = new HttpGet(testManagementApiUrl + "/testcase/" + issueKey);
@@ -119,6 +123,19 @@ class JiraService {
                 ? "Issue " + issueKey + " status updated: " + status
                 : "Cannot update " + issueKey + " status. " + addResponseInfo(response));
         put.releaseConnection();
+    }
+
+    // JIRA methods
+
+    static int checkConnection(String jiraUrl, String user, String password) {
+        String relativeUrl = formBaseUrl(jiraUrl) + JIRA_API_RELATIVE_PATH + "/myself";
+        try {
+            HttpGet get = new HttpGet(relativeUrl);
+            get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization(user, password));
+            return HttpClientBuilder.create().build().execute(get).getStatusLine().getStatusCode();
+        } catch (IOException e) {
+            return 0;
+        }
     }
 
     void manageLabel(String issueKey, String label, LabelAction action) throws IOException {
@@ -167,17 +184,6 @@ class JiraService {
         return fileToJiraLinkMapping;
     }
 
-    static int checkConnection(String jiraUrl, String user, String password) {
-        String relativeUrl = formBaseUrl(jiraUrl) + JIRA_API_RELATIVE_PATH + "/myself";
-        try {
-            HttpGet get = new HttpGet(relativeUrl);
-            get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization(user, password));
-            return HttpClientBuilder.create().build().execute(get).getStatusLine().getStatusCode();
-        } catch (IOException e) {
-            return 0;
-        }
-    }
-
     void addComment(String issueKey, String commentBody, boolean addLabel) throws IOException {
         HttpPost post = new HttpPost(jiraApiUrl + "/issue/" + issueKey + "/comment");
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
@@ -187,18 +193,12 @@ class JiraService {
 
         HttpResponse response = client.execute(post);
         int responseCode = response.getStatusLine().getStatusCode();
-        switch (responseCode) {
-            case 201:
-                logger.println("Test execution results for issue " + issueKey + " were successfully attached as "
-                        + "comment.\nIssue link: " + jiraApiUrl + "/issue/" + issueKey);
-                if (addLabel) manageLabel(issueKey, getLabelForDate(new Date()), LabelAction.ADD);
-                break;
-            case 400:
-                logger.println("Cannot attach test results: input is invalid (e.g. missing required fields, invalid " +
-                        "values, and so forth)");
-                break;
-            default:
-                logger.println("Cannot attach test results. " + addResponseInfo(response));
+        if (responseCode == 201) {
+            logger.println("Test execution results for issue " + issueKey + " were successfully attached as comment.\n"
+                    + "Issue link: " + jiraApiUrl + "/issue/" + issueKey);
+            if (addLabel) manageLabel(issueKey, getLabelForDate(new Date()), LabelAction.ADD);
+        } else {
+            logger.println("Cannot attach test results. " + addResponseInfo(response));
         }
         post.releaseConnection();
     }
@@ -207,14 +207,18 @@ class JiraService {
         HttpGet get = new HttpGet(jiraApiUrl + "/issue/" + issueKey + "/comment");
         get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(get);
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
-        get.releaseConnection();
-        try {
-            return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));
-        } catch (NullPointerException e) {
-            return null;
+
+        int responseCode = response.getStatusLine().getStatusCode();
+        if (responseCode == 200) {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(EntityUtils.toString(response.getEntity()), JsonObject.class);
+            int total = gson.fromJson(jsonObject.get("total"), int.class);
+            if (total > 0)
+                return Arrays.asList(gson.fromJson(jsonObject.get("comments"), Comment[].class));
+        } else {
+            logger.println("Cannot get comments for issue " + issueKey + ". " + addResponseInfo(response));
         }
+        return null;
     }
 
     private boolean removeResource(String urlPart) throws IOException {
