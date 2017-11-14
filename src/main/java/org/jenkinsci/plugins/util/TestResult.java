@@ -7,15 +7,15 @@ public enum TestResult {
     BLOCKED("Blocked", JiraFormatter.Color.GRAY),
     UNTESTED("Untested", JiraFormatter.Color.GRAY);
 
-    private String text;
-    private JiraFormatter.Color color;
+    private final String text;
+    private final JiraFormatter.Color color;
 
     TestResult(final String text, JiraFormatter.Color color) {
         this.text = text;
         this.color = color;
     }
 
-    public JiraFormatter.Color getColor() {
+    private JiraFormatter.Color getColor() {
         return color;
     }
 

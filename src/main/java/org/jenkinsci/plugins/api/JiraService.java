@@ -44,14 +44,14 @@ class JiraService {
     private final static String TEST_MANAGEMENT_RELATIVE_PATH = "rest/tm/1.0";
     private final int HTTP_CLIENT_TIMEOUT_SECONDS = 15;
 
-    private String username;
-    private String password;
-    private String baseUrl;
-    private String jiraApiUrl;
-    private String testManagementApiUrl;
-    private CloseableHttpClient client;
-    private String workspace;
-    private PrintStream logger;
+    private final String username;
+    private final String password;
+    private final String baseUrl;
+    private final String jiraApiUrl;
+    private final String testManagementApiUrl;
+    private final CloseableHttpClient client;
+    private final String workspace;
+    private final PrintStream logger;
 
     JiraService(String jiraUrl, String username, String password, String workspace, PrintStream logger) {
         this.username = username;

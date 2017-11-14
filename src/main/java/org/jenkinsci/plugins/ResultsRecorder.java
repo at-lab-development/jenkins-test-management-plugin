@@ -19,6 +19,7 @@ import org.kohsuke.stapler.QueryParameter;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.Calendar;
 
 
 /**
@@ -114,12 +115,12 @@ public class ResultsRecorder extends Recorder {
 
         public ListBoxModel doFillDateCriteriaItems() {
             ListBoxModel items = new ListBoxModel();
-            items.add("Year", "1");
-            items.add("Month", "2");
-            items.add("Week", "3");
-            items.add("Day", "5");
-            items.add("Hour", "10");
-            items.add("Minute", "12");
+            items.add(Messages.Date_Year(), String.valueOf(Calendar.YEAR));
+            items.add(Messages.Date_Month(), String.valueOf(Calendar.MONTH));
+            items.add(Messages.Date_Week(), String.valueOf(Calendar.WEEK_OF_YEAR));
+            items.add(Messages.Date_Day(), String.valueOf(Calendar.DATE));
+            items.add(Messages.Date_Hour(), String.valueOf(Calendar.HOUR_OF_DAY));
+            items.add(Messages.Date_Minute(), String.valueOf(Calendar.MINUTE));
             return items;
         }
 
@@ -142,17 +143,15 @@ public class ResultsRecorder extends Recorder {
             int status = TestManagementService.checkConnection(jiraUrl, user, password);
             switch (status) {
                 case 200:
-                    return FormValidation.ok("Success");
+                    return FormValidation.ok(Messages.FormValidation_ConnectionSuccessful());
                 case 500:
-                    return FormValidation.warning("Internal Server Error, check credentials");
+                    return FormValidation.warning(Messages.FormValidation_InternalError());
                 case 401:
-                    return FormValidation.warning("Authorization failed");
+                    return FormValidation.warning(Messages.FormValidation_AuthorizationFailed());
                 case 404:
-                    return FormValidation.error("Not found, check URL");
-                case 0:
-                    return FormValidation.error("Critical error");
+                    return FormValidation.error(Messages.FormValidation_InvalidUrl());
                 default:
-                    return FormValidation.error("Unknown error, status code: " + status);
+                    return FormValidation.error(Messages.FormValidation_UnknownError() + status);
             }
         }
 

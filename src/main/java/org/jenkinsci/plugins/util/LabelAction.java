@@ -5,7 +5,7 @@ public enum LabelAction {
     ADD("add"),
     REMOVE("remove");
 
-    private String text;
+    private final String text;
 
     LabelAction(final String text) {
         this.text = text;

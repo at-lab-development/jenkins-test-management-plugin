@@ -26,7 +26,7 @@ public class JiraFormatter {
      * @param str text for processing
      * @return formatted text
      */
-    public static String strong(String str) {
+    private static String strong(String str) {
         return "*" + str + "*";
     }
 
@@ -38,7 +38,7 @@ public class JiraFormatter {
      * @param color the value of Color enum
      * @return formatted text
      */
-    public static String color(String str, Color color) {
+    private static String color(String str, Color color) {
         return String.format("{color:%s}%s{color}", color.toString().toLowerCase(), str);
     }
 
@@ -78,7 +78,7 @@ public class JiraFormatter {
      * @param  params the list of values with titles (title will be put in the first column)
      * @return string with formatted table
      */
-    public static String twoColumnTable(String heading1, String heading2, List<Parameter> params) {
+    private static String twoColumnTable(String heading1, String heading2, List<Parameter> params) {
         final String TITLE_SEPARATOR = "||";
         final String VALUE_SEPARATOR = "|";
 
@@ -98,12 +98,12 @@ public class JiraFormatter {
     }
 
     /**
-     * Embraces a block of text within a fully customizable panel. At this time
-     * this panel has all configuration options set by default, but this options
-     * might be implemented as custlater (borderStyle, borderColor, borderWidth, bgColor, titleBGColor)
-     * @param title
-     * @param content
-     * @return
+     * Embraces a block of text within a fully customizable panel. At this time this panel
+     * has all configuration options set by default, but this options might be implemented
+     * as custom ones later (borderStyle, borderColor, borderWidth, bgColor, titleBGColor)
+     * @param title the title of panel
+     * @param content the body of panel
+     * @return text formatted as Jira panel
      */
     private static String createPanel(String title, String content) {
         return String.format("{panel:title=%s|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1}%s{panel}",
