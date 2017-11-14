@@ -1,5 +1,5 @@
 # Jenkins Test Management Plugin
-This plugin updates Jira issues with basic build information and useful artifacts (titled values, file links, screens, stack traces).
+This plugin updates Jira issues with basic build information and useful artifacts (titled values, user defined files, screenshoots, stack traces).
 
 ## Installing a plugin
 
