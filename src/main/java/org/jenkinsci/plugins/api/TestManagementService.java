@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
  */
 public class TestManagementService {
     private final JiraService jira;
-    private int buildNumber;
-    private PrintStream logger;
+    private final int buildNumber;
+    private final PrintStream logger;
 
     public TestManagementService(String jiraUrl, String username, String password, String workspace, int buildNumber,
                                  PrintStream logger) {
@@ -52,18 +52,26 @@ public class TestManagementService {
         jira.addComment(issue.getIssueKey(), commentBody, addLabel);
     }
 
+    /**
+     * Removes all report comments before specified date (excluding date passed as parameter)
+     *
+     * @param issueKey the issue key for comments removing
+     * @param expirationDate the date until which all comments are considered to be expired
+     *                       (excluded this specified date)
+     * @throws IOException exception throwing in the case of HttpClient problems
+     */
     public void removeExpiredComments(String issueKey, Date expirationDate) throws IOException {
         List<Comment> comments = jira.getComments(issueKey);
 
         if (comments == null) return;
 
-        Pattern attachmentPattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
+        Pattern attachmentIdPattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
         int commentCounter = 0;
         int attachmentCounter = 0;
         for (Comment comment : comments) {
             if (comment.getBody().contains(JiraFormatter.getTitle()) && comment.getCreated().before(expirationDate)) {
                 //Remove all attachments
-                Matcher matcher = attachmentPattern.matcher(comment.getBody());
+                Matcher matcher = attachmentIdPattern.matcher(comment.getBody());
                 while (matcher.find()) {
                     int attachmentId = Integer.valueOf(matcher.group());
                     if (jira.removeAttachment(attachmentId)) attachmentCounter++;
@@ -76,6 +84,7 @@ public class TestManagementService {
                 if (jira.removeComment(issueKey, comment.getId())) commentCounter++;
             }
         }
+        // Log results
         if (commentCounter > 0) {
             logger.print(commentCounter + " expired comments ");
             if (attachmentCounter > 0) logger.print("with " + attachmentCounter + " attachments ");
