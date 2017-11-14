@@ -1,5 +1,5 @@
 # Jenkins Test Management Plugin
-Plugin for automatic Jira issues (Tests) result update
+This plugin updates Jira issues with basic build information and useful artifacts (titled values, file links, screens, stack traces).
 
 ## Installing a plugin
 
