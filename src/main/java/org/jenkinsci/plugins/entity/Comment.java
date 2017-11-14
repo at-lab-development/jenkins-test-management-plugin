@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.entity;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Comment {
 
@@ -24,6 +25,7 @@ public class Comment {
     public Date getCreated() {
         String dateString = created.substring(0,created.indexOf('.'));
         SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        parser.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date date = null;
         try {
             date = parser.parse(dateString);
