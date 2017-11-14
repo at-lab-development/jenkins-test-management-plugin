@@ -20,6 +20,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 
+
+/**
+ * ResultsRecorder is a basic class providing essential plugin functionality as
+ * Jenkins post-build action. All actions with issues are done in perform method.
+ * All Jenkins UI interactions are placed in Descriptor class implementation.
+ *
+ * @author      Uladzimir Pryhazhanau
+ */
 public class ResultsRecorder extends Recorder {
 
     private final String jiraUrl;

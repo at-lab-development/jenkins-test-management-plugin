@@ -110,39 +110,24 @@ public class JiraFormatter {
                 title, content);
     }
 
-    private static Color chooseColor(String status) {
-        return status.equals(TestResult.FAILED.toString()) ? Color.RED
-                : status.equals(TestResult.PASSED.toString())  ? Color.GREEN : Color.GRAY;
-    }
-
-    private static String extractFileName(String link) {
-        return link.contains("\\")
-                ? link.substring(link.lastIndexOf('\\') + 1)
-                : link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
-    }
-
-    private static String replaceLinks(String text, List<String> links) {
-        String formattedText = text;
-        for (String link : links) {
-            String fileName = extractFileName(link);
-            formattedText = formattedText.replaceAll(fileName, attachmentLink(fileName));
-        }
-        return formattedText;
-    }
-
-    private static String replaceLineSeparator(String text) {
-        return text.replace("\n", LINE_SEPARATOR);
-    }
-
+    /**
+     * Formats issue in accordance with Jira Text Formatting Notation
+     *
+     * @param issue issue for parsing
+     * @param filesToJiraLinks mapping file paths (from xml file) to attached files links (from JIRA responses)
+     * @param buildNumber specified build number (from Jenkins build or specified by user)
+     * @param previousStatus issue status from previous build
+     * @return test representation of issue in accordance with Jira Text Formatting Notation
+     */
     public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
-        Color statusColor = chooseColor(issue.getStatus());
+        Color statusColor = TestResult.getColor(issue.getStatus());
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
 
         contentBuilder.append(strong("Build:")).append(" ").append(buildNumber).append(LINE_SEPARATOR);
         contentBuilder.append(strong("Status:")).append(" ");
 
         if (previousStatus != null && !previousStatus.equalsIgnoreCase(issue.getStatus())) {
-            contentBuilder.append(color(previousStatus, chooseColor(previousStatus))).append(" -> ");
+            contentBuilder.append(color(previousStatus, TestResult.getColor(previousStatus))).append(" -> ");
         }
         contentBuilder.append(color(issue.getStatus(), statusColor)).append(LINE_SEPARATOR);
 
@@ -179,8 +164,26 @@ public class JiraFormatter {
         return createPanel(TITLE, contentBuilder.toString());
     }
 
-    public static String parseIssue(Issue issue,  Map<String, String> filesToJiraLinks, int buildNumber) {
-        return parseIssue(issue, filesToJiraLinks, buildNumber, null);
+    // Auxiliary methods
+
+    // We have to replace all standard line separators with JSON-compatible
+    private static String replaceLineSeparator(String text) {
+        return text.replace("\n", LINE_SEPARATOR);
+    }
+
+    private static String extractFileName(String link) {
+        return link.contains("\\")
+                ? link.substring(link.lastIndexOf('\\') + 1)
+                : link.contains("/") ? link.substring(link.lastIndexOf('/') + 1) : link;
+    }
+
+    private static String replaceLinks(String text, List<String> links) {
+        String formattedText = text;
+        for (String link : links) {
+            String fileName = extractFileName(link);
+            formattedText = formattedText.replaceAll(fileName, attachmentLink(fileName));
+        }
+        return formattedText;
     }
 
     public static String getTitle() {

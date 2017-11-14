@@ -21,8 +21,8 @@ import java.util.List;
  * @author      Uladzimir Pryhazhanau
  */
 public class IssuesExecutor {
-    private TestManagementService service;
-    private PrintStream logger;
+    private final TestManagementService service;
+    private final PrintStream logger;
 
     public IssuesExecutor(TestManagementService service, PrintStream logger) {
         this.service = service;
