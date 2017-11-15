@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.api;
 import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Issue;
 import org.jenkinsci.plugins.util.JiraFormatter;
-import org.jenkinsci.plugins.util.LabelAction;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -78,7 +77,7 @@ public class TestManagementService {
                 }
 
                 //Remove label
-                jira.manageLabel(issueKey, jira.getLabelForDate(comment.getCreated()), LabelAction.REMOVE);
+                jira.removeLabel(issueKey, jira.getLabelForDate(comment.getCreated()));
 
                 //Remove comment
                 if (jira.removeComment(issueKey, comment.getId())) commentCounter++;

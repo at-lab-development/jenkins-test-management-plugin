@@ -21,7 +21,6 @@ import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.entity.Attachment;
 import org.jenkinsci.plugins.entity.Comment;
 import org.jenkinsci.plugins.entity.Test;
-import org.jenkinsci.plugins.util.LabelAction;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,7 +137,7 @@ class JiraService {
         }
     }
 
-    void manageLabel(String issueKey, String label, LabelAction action) throws IOException {
+    private void manageLabel(String issueKey, String label, String action) throws IOException {
         HttpPut put = new HttpPut(jiraApiUrl + "/issue/" + issueKey);
         put.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         put.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -147,9 +146,17 @@ class JiraService {
         HttpResponse response = client.execute(put);
 
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode == 204 && action.equals(LabelAction.ADD))
+        if (responseCode == 204 && action.equals("add"))
             logger.println("Add label \"" + label + "\" to issue " + issueKey);
         put.releaseConnection();
+    }
+
+    void addLabel(String issueKey, String label) throws IOException {
+        manageLabel(issueKey, label, "add");
+    }
+
+    void removeLabel(String issueKey, String label) throws IOException {
+        manageLabel(issueKey, label, "remove");
     }
 
     Map<String, String> attach(String issueKey, List<String> attachments) throws IOException {
@@ -196,7 +203,7 @@ class JiraService {
         if (responseCode == 201) {
             logger.println("Test execution results for issue " + issueKey + " were successfully attached as comment.\n"
                     + "Issue link: " + jiraApiUrl + "/issue/" + issueKey);
-            if (addLabel) manageLabel(issueKey, getLabelForDate(new Date()), LabelAction.ADD);
+            if (addLabel) addLabel(issueKey, getLabelForDate(new Date()));
         } else {
             logger.println("Cannot attach test results. " + addResponseInfo(response));
         }
