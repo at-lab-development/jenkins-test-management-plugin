@@ -18,18 +18,24 @@
     </f:block>
     <f:advanced>
         <f:block>
-            <table width="100%">
+            <table>
                 <f:optionalBlock title="Add labels" field="addLabel" checked="${instance.isAddLabel()}"
                                  inline="true">
+                        <f:entry title="Prefix:" field="prefix">
+                            <f:textbox/>
+                        </f:entry>
+                        <f:entry title="Add info:" field="addInfo">
+                            <f:select/>
+                        </f:entry>
                 </f:optionalBlock>
                 <f:optionalBlock title="Delete old reports" field="toDelete" checked="${instance.isToDelete()}"
                                  inline="true">
-                    <f:entry title="Older than" field="deleteCriteria">
-                        <f:textbox default="3"/>
-                    </f:entry>
-                    <f:entry field="dateCriteria">
-                        <f:select/>
-                    </f:entry>
+                        <f:entry title="Older than" field="deleteCriteria">
+                            <f:textbox default="3"/>
+                        </f:entry>
+                        <f:entry field="dateCriteria">
+                            <f:select/>
+                        </f:entry>
                 </f:optionalBlock>
             </table>
         </f:block>

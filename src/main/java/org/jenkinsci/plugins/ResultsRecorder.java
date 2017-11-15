@@ -38,6 +38,8 @@ public class ResultsRecorder extends Recorder {
     private final String deleteCriteria;
     private final boolean toDelete;
     private final boolean addLabel;
+    private final String prefix;
+    private final String addInfo;
 
     @DataBoundConstructor
     public ResultsRecorder(String jiraUrl,
@@ -46,7 +48,9 @@ public class ResultsRecorder extends Recorder {
                            String dateCriteria,
                            String deleteCriteria,
                            boolean toDelete,
-                           boolean addLabel) {
+                           boolean addLabel,
+                           String prefix,
+                           String addInfo) {
         this.jiraUrl = jiraUrl;
         this.username = username;
         this.password = password;
@@ -54,6 +58,8 @@ public class ResultsRecorder extends Recorder {
         this.deleteCriteria = deleteCriteria;
         this.toDelete = toDelete;
         this.addLabel = addLabel;
+        this.prefix = prefix;
+        this.addInfo = addInfo;
     }
 
     @Override
@@ -124,6 +130,13 @@ public class ResultsRecorder extends Recorder {
             return items;
         }
 
+        public ListBoxModel doFillAddInfoItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add(Messages.Label_Build_Date(), "1");
+            items.add(Messages.Label_Build_Number(), "2");
+            return items;
+        }
+
         public DescriptorImpl() {
             load();
         }
@@ -153,6 +166,10 @@ public class ResultsRecorder extends Recorder {
                 default:
                     return FormValidation.error(Messages.FormValidation_UnknownError() + status);
             }
+        }
+
+        public FormValidation doCheckPrefix(@QueryParameter String value) {
+            return value.length() <= 15 ? FormValidation.ok() : FormValidation.error("Too many characters");
         }
 
         public FormValidation doCheckJiraUrl(@QueryParameter String value) {
