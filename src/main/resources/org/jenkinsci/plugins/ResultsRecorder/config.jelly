@@ -18,7 +18,7 @@
     </f:block>
     <f:advanced>
         <f:block>
-            <table>
+            <table width="80%">
                 <f:optionalBlock title="Add labels" field="addLabel" checked="${instance.isAddLabel()}"
                                  inline="true">
                         <f:entry title="Prefix:" field="prefix">
