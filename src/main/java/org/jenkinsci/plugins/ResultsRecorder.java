@@ -12,7 +12,9 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import org.jenkinsci.plugins.api.TestManagementService;
+import org.jenkinsci.plugins.util.Label;
 import org.jenkinsci.plugins.util.IssuesExecutor;
+import org.jenkinsci.plugins.util.LabelOption;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -73,9 +75,16 @@ public class ResultsRecorder extends Recorder {
         PrintStream logger = listener.getLogger();
         String workspace = build.getProject().getSomeWorkspace().getRemote();
         File xml = new File(workspace + "/target/tm-testng.xml");
+        String formattedLabel = null;
+
+        if (isAddLabel()) {
+            Label label = new Label(prefix, LabelOption.valueOf(addInfo));
+            formattedLabel = label.needDate() ? label.formatWithTodayDate() : label.formatWith(build.number);
+        }
 
         service = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), workspace, build.number, logger);
-        new IssuesExecutor(service, logger).execute(xml, deleteCriteria, dateCriteria, isAddLabel());
+
+        new IssuesExecutor(service, logger).execute(xml, deleteCriteria, dateCriteria, formattedLabel);
         return true;
     }
 
@@ -132,8 +141,8 @@ public class ResultsRecorder extends Recorder {
 
         public ListBoxModel doFillAddInfoItems() {
             ListBoxModel items = new ListBoxModel();
-            items.add(Messages.Label_Build_Date(), "1");
-            items.add(Messages.Label_Build_Number(), "2");
+            items.add(Messages.Label_Build_Date(), LabelOption.BUILD_DATE.toString());
+            items.add(Messages.Label_Build_Number(), LabelOption.BUILD_NUMBER.toString());
             return items;
         }
 

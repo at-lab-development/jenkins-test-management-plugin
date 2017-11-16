@@ -29,6 +29,16 @@ public class JiraFormatter {
     }
 
     /**
+     * Creates a bookmark anchor inside the page.
+     * Example: {anchor:anchorname}
+     * @param str text to be hidden (because anchors aren't displays)
+     * @return formatted anchor
+     */
+    private static String hiddenAnchor(String str) {
+        return "{anchor:" + str + "}";
+    }
+
+    /**
      * Changes the color of a block of text.
      * Example: {color:red}look ma, red text!{color}
      *
@@ -117,7 +127,8 @@ public class JiraFormatter {
      * @param previousStatus issue status from previous build
      * @return test representation of issue in accordance with Jira Text Formatting Notation
      */
-    public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber, String previousStatus) {
+    public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber,
+                                    String previousStatus, String label) {
         String statusColor = TestResult.getColor(issue.getStatus());
         StringBuilder contentBuilder = new StringBuilder(LINE_SEPARATOR);
 
@@ -158,8 +169,9 @@ public class JiraFormatter {
             contentBuilder.append(LINE_SEPARATOR).append(strong("Attachments")).append(LINE_SEPARATOR)
                     .append(twoColumnTable("Attachment", "Created by", attachments));
         }
+        String formattedPanel = createPanel(TITLE, contentBuilder.toString());
 
-        return createPanel(TITLE, contentBuilder.toString());
+        return label != null ? hiddenAnchor(label) + formattedPanel : formattedPanel;
     }
 
     // Auxiliary methods

@@ -25,7 +25,6 @@ import org.jenkinsci.plugins.entity.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -85,11 +84,6 @@ class JiraService {
     private String addResponseInfo(HttpResponse response) {
         StatusLine statusLine = response.getStatusLine();
         return "Response code: " + statusLine.getStatusCode() + ". Reason: " + statusLine.getReasonPhrase();
-    }
-
-    String getLabelForDate(Date date) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-        return "build_" + formatter.format(date);
     }
 
     // Test Management methods
@@ -191,7 +185,7 @@ class JiraService {
         return fileToJiraLinkMapping;
     }
 
-    void addComment(String issueKey, String commentBody, boolean addLabel) throws IOException {
+    void addComment(String issueKey, String commentBody, String label) throws IOException {
         HttpPost post = new HttpPost(jiraApiUrl + "/issue/" + issueKey + "/comment");
         post.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         post.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
@@ -203,7 +197,7 @@ class JiraService {
         if (responseCode == 201) {
             logger.println("Test execution results for issue " + issueKey + " were successfully attached as comment.\n"
                     + "Issue link: " + jiraApiUrl + "/issue/" + issueKey);
-            if (addLabel) addLabel(issueKey, getLabelForDate(new Date()));
+            if (label != null) addLabel(issueKey, label);
         } else {
             logger.println("Cannot attach test results. " + addResponseInfo(response));
         }
@@ -214,6 +208,7 @@ class JiraService {
         HttpGet get = new HttpGet(jiraApiUrl + "/issue/" + issueKey + "/comment");
         get.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(get);
+        get.releaseConnection();
 
         int responseCode = response.getStatusLine().getStatusCode();
         if (responseCode == 200) {
@@ -232,6 +227,7 @@ class JiraService {
         HttpDelete delete = new HttpDelete(jiraApiUrl + urlPart);
         delete.setHeader(HttpHeaders.AUTHORIZATION, getAuthorization());
         HttpResponse response = client.execute(delete);
+        delete.releaseConnection();
         return response.getStatusLine().getStatusCode() == 204;
     }
 

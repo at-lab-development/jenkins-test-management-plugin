@@ -41,7 +41,7 @@ public class IssuesExecutor {
         return issues;
     }
 
-    public void execute(List<Issue> issues, String deleteCriteria, String dateCriteria, boolean addLabel) {
+    public void execute(List<Issue> issues, String deleteCriteria, String dateCriteria, String label) {
         Date expirationDate = null;
         if (dateCriteria != null && deleteCriteria != null) {
             Calendar calendar = Calendar.getInstance();
@@ -52,7 +52,7 @@ public class IssuesExecutor {
         try {
             for (Issue issue : issues) {
                 logger.println("-----REPORTING " + issue.getIssueKey().toUpperCase() + " ISSUE INFO-----");
-                service.postTestResults(issue, addLabel);
+                service.postTestResults(issue, label);
                 if (expirationDate != null) service.removeExpiredComments(issue.getIssueKey(), expirationDate);
                 logger.println();
             }
@@ -61,7 +61,7 @@ public class IssuesExecutor {
         }
     }
 
-    public void execute(File file, String deleteCriteria, String dateCriteria, boolean addLabel) {
-        execute(parse(file), deleteCriteria, dateCriteria, addLabel);
+    public void execute(File file, String deleteCriteria, String dateCriteria, String label) {
+        execute(parse(file), deleteCriteria, dateCriteria, label);
     }
 }

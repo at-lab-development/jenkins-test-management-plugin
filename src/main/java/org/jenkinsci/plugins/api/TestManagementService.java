@@ -43,12 +43,12 @@ public class TestManagementService {
         return JiraService.checkConnection(jiraUrl, username, password);
     }
 
-    public void postTestResults(Issue issue, boolean addLabel) throws IOException {
+    public void postTestResults(Issue issue, String label) throws IOException {
         String oldStatus = jira.getTestStatus(issue.getIssueKey());
         Map<String, String> filesToJiraLinks = jira.attach(issue.getIssueKey(), issue.getAttachments());
         jira.updateTestStatus(issue.getIssueKey(), issue.getStatus());
-        String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, oldStatus);
-        jira.addComment(issue.getIssueKey(), commentBody, addLabel);
+        String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, oldStatus, label);
+        jira.addComment(issue.getIssueKey(), commentBody, label);
     }
 
     /**
@@ -65,19 +65,21 @@ public class TestManagementService {
         if (comments == null) return;
 
         Pattern attachmentIdPattern = Pattern.compile("(?<=secure/attachment/)\\d+(?=/)");
+        Pattern hiddenLabel = Pattern.compile("(?<=\\{anchor:).+(?=}\\{panel)");
         int commentCounter = 0;
         int attachmentCounter = 0;
         for (Comment comment : comments) {
             if (comment.getBody().contains(JiraFormatter.getTitle()) && comment.getCreated().before(expirationDate)) {
                 //Remove all attachments
-                Matcher matcher = attachmentIdPattern.matcher(comment.getBody());
-                while (matcher.find()) {
-                    int attachmentId = Integer.valueOf(matcher.group());
+                Matcher attachmentsMatcher = attachmentIdPattern.matcher(comment.getBody());
+                while (attachmentsMatcher.find()) {
+                    int attachmentId = Integer.valueOf(attachmentsMatcher.group());
                     if (jira.removeAttachment(attachmentId)) attachmentCounter++;
                 }
 
                 //Remove label
-                jira.removeLabel(issueKey, jira.getLabelForDate(comment.getCreated()));
+                Matcher labelMatcher = hiddenLabel.matcher(comment.getBody());
+                if (labelMatcher.find()) jira.removeLabel(issueKey, labelMatcher.group());
 
                 //Remove comment
                 if (jira.removeComment(issueKey, comment.getId())) commentCounter++;
