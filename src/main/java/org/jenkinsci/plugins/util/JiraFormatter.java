@@ -12,7 +12,7 @@ import java.util.Map;
  * Text Formatting Notation for their further publishing as Jira Issue comments
  * in a readable format.
  *
- * @author      Alena Zubrevich
+ * @author Alena Zubrevich
  */
 public class JiraFormatter {
     private static final String LINE_SEPARATOR = "\\r";
@@ -21,6 +21,7 @@ public class JiraFormatter {
     /**
      * Makes text strong (bold)
      * Example: *strong*
+     *
      * @param str text for processing
      * @return formatted text
      */
@@ -31,6 +32,7 @@ public class JiraFormatter {
     /**
      * Creates a bookmark anchor inside the page.
      * Example: {anchor:anchorname}
+     *
      * @param str text to be hidden (because anchors aren't displays)
      * @return formatted anchor
      */
@@ -42,7 +44,7 @@ public class JiraFormatter {
      * Changes the color of a block of text.
      * Example: {color:red}look ma, red text!{color}
      *
-     * @param str text for processing
+     * @param str   text for processing
      * @param color the value of Color enum
      * @return formatted text
      */
@@ -55,6 +57,7 @@ public class JiraFormatter {
      * to the last current issue attachment with such a name. It's useful for files
      * with unique name (for instance, if they have timestamp in their name).
      * Example: [^attachment.ext]
+     *
      * @param attachmentName the exact name of attached file
      * @return attachment name formatted as link
      */
@@ -66,24 +69,24 @@ public class JiraFormatter {
      * Creates a link to a resource, this allows us to create links to different
      * attachments with exact name
      * Example: [attachment.ext|https://jira.epam.com/jira/secure/attachment/{issue-key}/attachment.ext]
-     * @param attachmentName the exact name of attached file
-     * @param jiraLink the link to issue attachment
      *
+     * @param attachmentName the exact name of attached file
+     * @param jiraLink       the link to issue attachment
      * @return attachment name formatted as link
      */
     private static String attachmentLink(String attachmentName, String jiraLink) {
-        return "[" + attachmentName + "|" + jiraLink +"]";
+        return "[" + attachmentName + "|" + jiraLink + "]";
     }
 
     /**
      * Returns string representation of two column Jira table with a header row.
      * Example: ||header 1||header 2||
-     *          |column A1 |column A2|
-     *          |column B1 |column B2|
+     * |column A1 |column A2|
+     * |column B1 |column B2|
      *
-     * @param  heading1 first column header
-     * @param  heading2 second column header
-     * @param  params the list of values with titles (title will be put in the first column)
+     * @param heading1 first column header
+     * @param heading2 second column header
+     * @param params   the list of values with titles (title will be put in the first column)
      * @return string with formatted table
      */
     private static String twoColumnTable(String heading1, String heading2, List<Parameter> params) {
@@ -99,7 +102,7 @@ public class JiraFormatter {
         //Form body
         for (Parameter param : params) {
             builder.append(VALUE_SEPARATOR).append(param.getTitle()).append(VALUE_SEPARATOR).append(param.getValue())
-                        .append(VALUE_SEPARATOR).append(LINE_SEPARATOR);
+                    .append(VALUE_SEPARATOR).append(LINE_SEPARATOR);
         }
 
         return builder.toString();
@@ -109,7 +112,8 @@ public class JiraFormatter {
      * Embraces a block of text within a fully customizable panel. At this time this panel
      * has all configuration options set by default, but this options might be implemented
      * as custom ones later (borderStyle, borderColor, borderWidth, bgColor, titleBGColor)
-     * @param title the title of panel
+     *
+     * @param title   the title of panel
      * @param content the body of panel
      * @return text formatted as Jira panel
      */
@@ -121,10 +125,10 @@ public class JiraFormatter {
     /**
      * Formats issue in accordance with Jira Text Formatting Notation
      *
-     * @param issue issue for parsing
+     * @param issue            issue for parsing
      * @param filesToJiraLinks mapping file paths (from xml file) to attached files links (from JIRA responses)
-     * @param buildNumber specified build number (from Jenkins build or specified by user)
-     * @param previousStatus issue status from previous build
+     * @param buildNumber      specified build number (from Jenkins build or specified by user)
+     * @param previousStatus   issue status from previous build
      * @return test representation of issue in accordance with Jira Text Formatting Notation
      */
     public static String parseIssue(Issue issue, Map<String, String> filesToJiraLinks, int buildNumber,

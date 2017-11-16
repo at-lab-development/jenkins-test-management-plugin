@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
  * with a focus on plugin purposes. This class is based on JiraService class
  * functionality.
  *
- * @author      Uladzimir Pryhazhanau
- * @author      Alena Zubrevich
+ * @author Uladzimir Pryhazhanau
+ * @author Alena Zubrevich
  */
 public class TestManagementService {
     private final JiraService jira;
@@ -54,7 +54,7 @@ public class TestManagementService {
     /**
      * Removes all report comments before specified date (excluding date passed as parameter)
      *
-     * @param issueKey the issue key for comments removing
+     * @param issueKey       the issue key for comments removing
      * @param expirationDate the date until which all comments are considered to be expired
      *                       (excluded this specified date)
      * @throws IOException exception throwing in the case of HttpClient problems

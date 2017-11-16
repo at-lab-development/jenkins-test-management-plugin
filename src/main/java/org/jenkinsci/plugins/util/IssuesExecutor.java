@@ -18,7 +18,7 @@ import java.util.List;
  * IssuesExecutor is a basic class responsible for issues parsing, execution
  * and publishing.
  *
- * @author      Uladzimir Pryhazhanau
+ * @author Uladzimir Pryhazhanau
  */
 public class IssuesExecutor {
     private final TestManagementService service;
