@@ -20,14 +20,6 @@ public class Label {
         this.prefix = prefix != null ? prefix : "";
     }
 
-    public LabelOption getAdditionalInfo() {
-        return additionalInfo;
-    }
-
-    public void setAdditionalInfo(LabelOption additionalInfo) {
-        this.additionalInfo = additionalInfo;
-    }
-
     public boolean needDate() {
         return additionalInfo != null && additionalInfo.equals(LabelOption.BUILD_DATE);
     }
