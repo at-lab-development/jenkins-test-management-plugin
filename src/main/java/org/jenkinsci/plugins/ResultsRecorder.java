@@ -12,8 +12,8 @@ import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import org.jenkinsci.plugins.api.TestManagementService;
-import org.jenkinsci.plugins.util.Label;
 import org.jenkinsci.plugins.util.IssuesExecutor;
+import org.jenkinsci.plugins.util.Label;
 import org.jenkinsci.plugins.util.LabelOption;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -29,7 +29,7 @@ import java.util.Calendar;
  * Jenkins post-build action. All actions with issues are done in perform method.
  * All Jenkins UI interactions are placed in Descriptor class implementation.
  *
- * @author      Uladzimir Pryhazhanau
+ * @author Uladzimir Pryhazhanau
  */
 public class ResultsRecorder extends Recorder {
 
@@ -71,20 +71,30 @@ public class ResultsRecorder extends Recorder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
-        TestManagementService service;
         PrintStream logger = listener.getLogger();
         String workspace = build.getProject().getSomeWorkspace().getRemote();
+        int buildNumber = build.number;
         File xml = new File(workspace + "/target/tm-testng.xml");
         String formattedLabel = null;
+        String deleteCriteria = null;
+        String dateCriteria = null;
+        TestManagementService service;
 
+        // If the "add label" option is selected in "Advanced" section
         if (isAddLabel()) {
             Label label = new Label(prefix, LabelOption.valueOf(addInfo));
-            formattedLabel = label.needDate() ? label.formatWithTodayDate() : label.formatWith(build.number);
+            formattedLabel = label.needDate() ? label.formatWithTodayDate() : label.formatWith(buildNumber);
         }
 
-        service = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), workspace, build.number, logger);
+        // If the "clean-up" option is selected in "Advanced" section
+        if (isToDelete()) {
+            deleteCriteria = getDeleteCriteria();
+            dateCriteria = getDateCriteria();
+        }
 
+        service = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), workspace, buildNumber, logger);
         new IssuesExecutor(service, logger).execute(xml, deleteCriteria, dateCriteria, formattedLabel);
+
         return true;
     }
 
