@@ -119,6 +119,14 @@ public class ResultsRecorder extends Recorder {
         return addLabel;
     }
 
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public String getAddInfo() {
+        return addInfo;
+    }
+
     public String getDateCriteria() {
         return dateCriteria;
     }
