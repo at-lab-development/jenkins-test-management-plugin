@@ -3,7 +3,7 @@ This plugin updates Jira issues with basic build information and useful artifact
 
 ## How it works
 
-The key thing is that this plugin are working in tandem with [Test Management Adapter] which is the Maven dependency providing data gathering posibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
+The key thing is that this plugin are working in tandem with [Test Management Adapter] which is the Maven dependency providing data gathering possibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
 
 ![Scheme](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_main_scheme.jpg)
 
