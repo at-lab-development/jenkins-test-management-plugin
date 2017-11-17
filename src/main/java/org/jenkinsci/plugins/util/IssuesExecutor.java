@@ -57,7 +57,7 @@ public class IssuesExecutor {
                 logger.println();
             }
         } catch (IOException e) {
-            logger.println(e.getMessage());
+            logger.println("Cannot update issues. Error message: " + e.getMessage());
         }
     }
 
