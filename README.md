@@ -46,6 +46,10 @@ need to set some advanced options. You will need to hit the **Advanced** button 
 
 ![Advanced button](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_02.jpg)
 
+After that you can specify label type (prefix + build date or number) or expiration time period for clean-up function.
+
+![Additional options](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_03.jpg)
+
 ## Report
 
 The Test result report is placed as Jira comment. Only build and status fields are mandatory, the others are optional. 
