@@ -46,7 +46,10 @@ public class TestManagementService {
     public void postTestResults(Issue issue, String label) throws IOException {
         String oldStatus = jira.getTestStatus(issue.getIssueKey());
         Map<String, String> filesToJiraLinks = jira.attach(issue.getIssueKey(), issue.getAttachments());
-        jira.updateTestStatus(issue.getIssueKey(), issue.getStatus());
+
+        if (!issue.getStatus().equals(oldStatus))
+            jira.updateTestStatus(issue.getIssueKey(), issue.getStatus());
+
         String commentBody = JiraFormatter.parseIssue(issue, filesToJiraLinks, buildNumber, oldStatus, label);
         jira.addComment(issue.getIssueKey(), commentBody, label);
     }
