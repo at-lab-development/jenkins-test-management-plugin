@@ -50,7 +50,7 @@ After that you can specify label type (prefix + build date or number) or expirat
 
 ![Additional options](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_03.jpg)
 
-## Report
+## Report Example
 
 The Test result report is placed as Jira comment. Only build and status fields are mandatory, the others are optional. 
 
