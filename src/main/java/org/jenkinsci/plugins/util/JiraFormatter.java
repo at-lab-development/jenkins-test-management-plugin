@@ -146,7 +146,7 @@ public class JiraFormatter {
 
         if (issue.getSummary() != null) {
             contentBuilder.append(strong("Summary:")).append(" ");
-            String summary = replaceLineSeparator(issue.getSummary());
+            String summary = replaceLineSeparator(replaceDoubleQuotes(issue.getSummary()));
             if (issue.getAttachments() != null) {
                 contentBuilder.append(replaceLinks(summary, issue.getAttachments()));
             } else
@@ -184,6 +184,9 @@ public class JiraFormatter {
     private static String replaceLineSeparator(String text) {
         return text.replace("\n", LINE_SEPARATOR);
     }
+
+    // We have to replace all double quotes with JSON-compatible quotes
+    private static String replaceDoubleQuotes(String text) {return text.replace('\"', '\'');}
 
     private static String extractFileName(String link) {
         return link.contains("\\")
