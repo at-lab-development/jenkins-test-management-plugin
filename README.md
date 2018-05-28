@@ -5,7 +5,7 @@ This plugin updates Jira issues with basic build information and useful artifact
 
 The key thing is that this plugin are working in tandem with [Test Management Adapter] which is the Maven dependency providing data gathering possibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
 
-![Scheme](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_main_scheme.jpg)
+![Scheme](https://git.epam.com/Pavel_Irher/test-management-jenkins-plugin/tree/master/images/readme_main_scheme.jpg)
 
 ## Installing a plugin
 
@@ -35,7 +35,7 @@ The master will need to be restarted before the plugin is loaded and made availa
 
 You need to add `Jira Test Management Results Updater` as your job post-build action. 
 
-![Post-build Action](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_00.jpg)
+![Post-build Action](https://git.epam.com/Pavel_Irher/test-management-jenkins-plugin/tree/master/images/readme_file_00.jpg)
 
 You should fill out _url_, _username_ and _password_ fields with valid data (you can test connection using **Test connection** button). 
 
@@ -44,17 +44,17 @@ You should fill out _url_, _username_ and _password_ fields with valid data (you
 If you want to add `labels` to your project updated issues or take advantage of `clean-up` feature, you 
 need to set some advanced options. You will need to hit the **Advanced** button to see them.
 
-![Advanced button](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_02.jpg)
+![Advanced button](https://git.epam.com/Pavel_Irher/test-management-jenkins-plugin/tree/master/images/readme_file_02.jpg)
 
 After that you can specify label type (prefix + build date or number) or expiration time period for clean-up function.
 
-![Additional options](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_03.jpg)
+![Additional options](https://git.epam.com/Pavel_Irher/test-management-jenkins-plugin/tree/master/images/readme_file_03.jpg)
 
 ## Report Example
 
 The Test result report is placed as Jira comment. Only build and status fields are mandatory, the others are optional. 
 
-![Report example](https://github.com/teo-rakan/test-management-jenkins-plugin/blob/master/images/readme_file_04.jpg)
+![Report example](https://git.epam.com/Pavel_Irher/test-management-jenkins-plugin/tree/master/images/readme_file_04.jpg)
 
 [Test Management Adapter]: https://github.com/teo-rakan/test-management-adapter.git
 [Jira Text Formatting Notation]: https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
