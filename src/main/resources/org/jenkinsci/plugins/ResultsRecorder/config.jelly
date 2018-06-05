@@ -12,6 +12,9 @@
         <f:entry title="Jira Password" field="password">
             <f:password/>
         </f:entry>
+        <f:entry title="Workspace Path" field="workspacePath">
+            <f:workspacePath/>
+        </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Connecting...}"
                 method="testConnection" with="secretKey,accessId"/>

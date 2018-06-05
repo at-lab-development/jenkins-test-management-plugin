@@ -36,6 +36,7 @@ public class ResultsRecorder extends Recorder {
     private final String jiraUrl;
     private final String username;
     private final String password;
+    private final String workspacePath;
     private final String dateCriteria;
     private final String deleteCriteria;
     private final boolean toDelete;
@@ -47,6 +48,7 @@ public class ResultsRecorder extends Recorder {
     public ResultsRecorder(String jiraUrl,
                            String username,
                            String password,
+                           String workspacePath,
                            String dateCriteria,
                            String deleteCriteria,
                            boolean toDelete,
@@ -56,6 +58,7 @@ public class ResultsRecorder extends Recorder {
         this.jiraUrl = jiraUrl;
         this.username = username;
         this.password = password;
+        this.workspacePath = workspacePath;
         this.dateCriteria = dateCriteria;
         this.deleteCriteria = deleteCriteria;
         this.toDelete = toDelete;
@@ -72,7 +75,7 @@ public class ResultsRecorder extends Recorder {
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
         PrintStream logger = listener.getLogger();
-        String workspace = build.getProject().getSomeWorkspace().getRemote();
+        String workspace = resolveWorkspacePath(build);
         int buildNumber = build.number;
         File xml = new File(workspace + "/target/tm-testng.xml");
         String formattedLabel = null;
@@ -115,6 +118,10 @@ public class ResultsRecorder extends Recorder {
         return password;
     }
 
+    public String getWorkspacePath() {
+        return workspacePath;
+    }
+
     public boolean isAddLabel() {
         return addLabel;
     }
@@ -139,12 +146,23 @@ public class ResultsRecorder extends Recorder {
         return toDelete;
     }
 
+    public String resolveWorkspacePath(AbstractBuild<?, ?> build) {
+        String workspace = build.getProject().getSomeWorkspace().getRemote();
+
+        String workspaceParameter = getWorkspacePath();
+        if(workspaceParameter != null){
+            workspace = workspaceParameter;
+        }
+
+        return workspace;
+    }
 
     @Extension
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         private String jiraUrl;
         private String user;
         private String password;
+        private String workspacePath;
 
         public ListBoxModel doFillDateCriteriaItems() {
             ListBoxModel items = new ListBoxModel();
@@ -215,6 +233,13 @@ public class ResultsRecorder extends Recorder {
             password = value;
             return (value.length() == 0)
                     ? FormValidation.error(Messages.FormValidation_EmptyPassword())
+                    : FormValidation.ok();
+        }
+
+        public FormValidation doCheckWorkspacePath(@QueryParameter String value) {
+            workspacePath = value;
+            return (value.length() == 0)
+                    ? FormValidation.error(Messages.FormValidation_EmptyWorkspacePath())
                     : FormValidation.ok();
         }
     }
