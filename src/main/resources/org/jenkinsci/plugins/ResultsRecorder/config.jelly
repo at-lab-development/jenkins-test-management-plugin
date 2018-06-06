@@ -12,9 +12,6 @@
         <f:entry title="Jira Password" field="password">
             <f:password/>
         </f:entry>
-        <f:entry title="Workspace Path" field="workspacePath">
-            <f:textbox/>
-        </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Connecting...}"
                 method="testConnection" with="secretKey,accessId"/>
@@ -22,6 +19,12 @@
     <f:advanced>
         <f:block>
             <table width="80%">
+                <f:optionalBlock title="Custom workspace" field="workspacePathEnabled" checked="${instance.isWorkspacePathEnabled()}"
+                                 inline="true">
+                        <f:entry title="Workspace Path:" field="workspacePath">
+                            <f:textbox/>
+                        </f:entry>
+                </f:optionalBlock>
                 <f:optionalBlock title="Add labels" field="addLabel" checked="${instance.isAddLabel()}"
                                  inline="true">
                         <f:entry title="Prefix:" field="prefix">

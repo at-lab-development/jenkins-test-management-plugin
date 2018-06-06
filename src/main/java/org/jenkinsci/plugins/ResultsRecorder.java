@@ -36,6 +36,7 @@ public class ResultsRecorder extends Recorder {
     private final String jiraUrl;
     private final String username;
     private final String password;
+    private final boolean workspacePathEnabled;
     private final String workspacePath;
     private final String dateCriteria;
     private final String deleteCriteria;
@@ -48,6 +49,7 @@ public class ResultsRecorder extends Recorder {
     public ResultsRecorder(String jiraUrl,
                            String username,
                            String password,
+                           boolean workspacePathEnabled,
                            String workspacePath,
                            String dateCriteria,
                            String deleteCriteria,
@@ -58,6 +60,7 @@ public class ResultsRecorder extends Recorder {
         this.jiraUrl = jiraUrl;
         this.username = username;
         this.password = password;
+        this.workspacePathEnabled = workspacePathEnabled;
         this.workspacePath = workspacePath;
         this.dateCriteria = dateCriteria;
         this.deleteCriteria = deleteCriteria;
@@ -118,6 +121,10 @@ public class ResultsRecorder extends Recorder {
         return password;
     }
 
+    public boolean isWorkspacePathEnabled() {
+        return workspacePathEnabled;
+    }
+
     public String getWorkspacePath() {
         return workspacePath;
     }
@@ -148,6 +155,10 @@ public class ResultsRecorder extends Recorder {
 
     public String resolveWorkspacePath(AbstractBuild<?, ?> build) {
         String workspace = build.getProject().getSomeWorkspace().getRemote();
+
+        if (!isWorkspacePathEnabled()) {
+            return workspace;
+        }
 
         String workspaceParameter = getWorkspacePath();
         if(workspaceParameter != null){
@@ -238,6 +249,11 @@ public class ResultsRecorder extends Recorder {
 
         public FormValidation doCheckWorkspacePath(@QueryParameter String value) {
             workspacePath = value;
+
+            if (!isWorkspacePathEnabled()) {
+                FormValidation.ok();
+            }
+
             return (value.length() == 0)
                     ? FormValidation.error(Messages.FormValidation_EmptyWorkspacePath())
                     : FormValidation.ok();
