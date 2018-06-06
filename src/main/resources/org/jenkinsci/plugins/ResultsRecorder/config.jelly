@@ -13,7 +13,7 @@
             <f:password/>
         </f:entry>
         <f:entry title="Workspace Path" field="workspacePath">
-            <f:workspacePath/>
+            <f:textbox/>
         </f:entry>
         <f:validateButton
                 title="${%Test Connection}" progress="${%Connecting...}"
