@@ -80,7 +80,12 @@ public class ResultsRecorder extends Recorder {
         PrintStream logger = listener.getLogger();
         String workspace = resolveWorkspacePath(build);
         int buildNumber = build.number;
+        
         File xml = new File(workspace + "/target/tm-testng.xml");
+        if(!xml.exists()){
+            FormValidation.error(Messages.FormValidation_TestResultsFileNotFound());
+        }
+
         String formattedLabel = null;
         String deleteCriteria = null;
         String dateCriteria = null;
