@@ -247,13 +247,13 @@ public class ResultsRecorder extends Recorder {
                     : FormValidation.ok();
         }
 
-        public FormValidation doCheckWorkspacePath(@QueryParameter String value) {
-            workspacePath = value;
-
-            if (!isWorkspacePathEnabled()) {
-                FormValidation.ok();
+        public FormValidation doCheckWorkspacePath(@QueryParameter String value, @QueryParameter boolean workspacePathEnabled) {
+            if (!workspacePathEnabled) {
+                return FormValidation.ok();
             }
 
+            workspacePath = value;
+            
             return (value.length() == 0)
                     ? FormValidation.error(Messages.FormValidation_EmptyWorkspacePath())
                     : FormValidation.ok();
