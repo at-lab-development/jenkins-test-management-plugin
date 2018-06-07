@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins;
 
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -78,9 +79,9 @@ public class ResultsRecorder extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
-        String workspace = resolveWorkspacePath(build);
+        String workspace = resolveWorkspacePath(build, listener);
         int buildNumber = build.number;
         File xml = new File(workspace + Constants.TEST_RESULTS_FILE_PATH);
         String formattedLabel = null;
@@ -155,7 +156,7 @@ public class ResultsRecorder extends Recorder {
         return toDelete;
     }
 
-    public String resolveWorkspacePath(AbstractBuild<?, ?> build) {
+    public String resolveWorkspacePath(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
         String workspace = build.getProject().getSomeWorkspace().getRemote();
 
         if (!isWorkspacePathEnabled()) {
@@ -164,7 +165,8 @@ public class ResultsRecorder extends Recorder {
 
         String workspaceParameter = getWorkspacePath();
         if(workspaceParameter != null){
-            workspace = workspaceParameter;
+            final EnvVars env = build.getEnvironment(listener);
+            workspace = env.expand(workspaceParameter);
         }
 
         return workspace;
@@ -255,18 +257,19 @@ public class ResultsRecorder extends Recorder {
                 return FormValidation.ok();
             }
 
-            if(workspacePath.length() == 0){
+            if(value.length() == 0){
                 return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
             }
 
-            String cw = project.getCustomWorkspace();
-            FilePath w = project.getSomeWorkspace();
-            String s = w.getRemote();
-            if(workspacePath.contains("${WORKSPACE}")){
-                workspacePath = workspacePath.replace("${WORKSPACE}", w.getRemote());
+            EnvVars envVars = project.getCharacteristicEnvVars();
+            value = envVars.expand(value);
+
+            FilePath someWorkspace = project.getSomeWorkspace();
+            if(value.contains("${WORKSPACE}")){
+                value = value.replace("${WORKSPACE}", someWorkspace.getRemote());
             }
 
-            File file = new File(workspacePath);
+            File file = new File(value);
             if(!file.exists()){
                 return FormValidation.error(Messages.FormValidation_TargetFolderNotFound());
             }
