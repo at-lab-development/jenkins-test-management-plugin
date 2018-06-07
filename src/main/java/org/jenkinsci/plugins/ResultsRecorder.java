@@ -80,12 +80,7 @@ public class ResultsRecorder extends Recorder {
         PrintStream logger = listener.getLogger();
         String workspace = resolveWorkspacePath(build);
         int buildNumber = build.number;
-        
-        File xml = new File(workspace + "/target/tm-testng.xml");
-        if(!xml.exists()){
-            FormValidation.error(Messages.FormValidation_TestResultsFileNotFound());
-        }
-
+        File xml = new File(workspace + Constants.TEST_RESULTS_FILE_PATH);
         String formattedLabel = null;
         String deleteCriteria = null;
         String dateCriteria = null;
@@ -253,15 +248,21 @@ public class ResultsRecorder extends Recorder {
         }
 
         public FormValidation doCheckWorkspacePath(@QueryParameter String value, @QueryParameter boolean workspacePathEnabled) {
+            workspacePath = value;
             if (!workspacePathEnabled) {
                 return FormValidation.ok();
             }
 
-            workspacePath = value;
+            if(workspacePath.length() == 0){
+                return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
+            }
+
+            File file = new File(workspacePath + Constants.TEST_RESULTS_FILE_PATH);
+            if(!file.exists()){
+                return FormValidation.error(Messages.FormValidation_TestResultsFileNotFound());
+            }
             
-            return (value.length() == 0)
-                    ? FormValidation.error(Messages.FormValidation_EmptyWorkspacePath())
-                    : FormValidation.ok();
+            return FormValidation.ok();
         }
     }
 }
