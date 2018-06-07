@@ -257,7 +257,10 @@ public class ResultsRecorder extends Recorder {
                 return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
             }
 
-            File file = new File(workspacePath + Constants.TEST_RESULTS_FILE_PATH);
+            if (workspacePath.startsWith("\"")& workspacePath.endsWith("\"")){
+                workspacePath = workspacePath.substring(1, workspacePath.length()-1).trim();
+            }
+            File file = new File(workspacePath);
             if(!file.exists()){
                 return FormValidation.error(Messages.FormValidation_TestResultsFileNotFound());
             }
