@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins;
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
@@ -15,6 +16,7 @@ import org.jenkinsci.plugins.api.TestManagementService;
 import org.jenkinsci.plugins.util.IssuesExecutor;
 import org.jenkinsci.plugins.util.Label;
 import org.jenkinsci.plugins.util.LabelOption;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
@@ -247,7 +249,7 @@ public class ResultsRecorder extends Recorder {
                     : FormValidation.ok();
         }
 
-        public FormValidation doCheckWorkspacePath(@QueryParameter String value, @QueryParameter boolean workspacePathEnabled) {
+        public FormValidation doCheckWorkspacePath(@QueryParameter String value, @QueryParameter boolean workspacePathEnabled, @AncestorInPath AbstractProject project) {
             workspacePath = value;
             if (!workspacePathEnabled) {
                 return FormValidation.ok();
@@ -255,6 +257,13 @@ public class ResultsRecorder extends Recorder {
 
             if(workspacePath.length() == 0){
                 return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
+            }
+
+            String cw = project.getCustomWorkspace();
+            FilePath w = project.getSomeWorkspace();
+            String s = w.getRemote();
+            if(workspacePath.contains("${WORKSPACE}")){
+                workspacePath = workspacePath.replace("${WORKSPACE}", w.getRemote());
             }
 
             File file = new File(workspacePath);
