@@ -278,7 +278,7 @@ public class ResultsRecorder extends Recorder {
 
             File file = new File(value);
             if(!file.exists()){
-                return FormValidation.error(Messages.FormValidation_TargetFolderNotFound());
+                return FormValidation.error(Messages.FormValidation_SpecifiedFolderNotFound());
             }
             
             return FormValidation.ok();

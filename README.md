@@ -48,7 +48,7 @@ need to set some advanced options. You will need to hit the **Advanced** button 
 
 After that you can specify label type (prefix + build date or number) or expiration time period for clean-up function.
 
-![Additional options](/images/readme_file_03.jpg)
+![Additional options](/images/post-build-action-full.jpg)
 
 ## Report Example
 
