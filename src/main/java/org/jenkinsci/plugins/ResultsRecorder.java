@@ -261,6 +261,10 @@ public class ResultsRecorder extends Recorder {
                 return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
             }
 
+            if (value.startsWith("\"") && value.endsWith("\"")){
+                value = value.substring(1, value.length()-1).trim();
+            }
+
             FilePath someWorkspace = project.getSomeWorkspace();
             if(value.contains(Constants.ENV_VARS_WORKSPACE)){
                 value = value.replace(Constants.ENV_VARS_WORKSPACE, someWorkspace.getRemote());
