@@ -164,10 +164,16 @@ public class ResultsRecorder extends Recorder {
         }
 
         String workspaceParameter = getWorkspacePath();
-        if(workspaceParameter != null){
-            final EnvVars env = build.getEnvironment(listener);
-            workspace = env.expand(workspaceParameter);
+        if(workspaceParameter == null){
+            return workspace;
         }
+
+        if (workspaceParameter.startsWith("\"") && workspaceParameter.endsWith("\"")){
+            workspaceParameter = workspaceParameter.substring(1, workspaceParameter.length()-1).trim();
+        }
+
+        final EnvVars env = build.getEnvironment(listener);
+        workspace = env.expand(workspaceParameter);
 
         return workspace;
     }
