@@ -261,12 +261,9 @@ public class ResultsRecorder extends Recorder {
                 return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
             }
 
-            EnvVars envVars = project.getCharacteristicEnvVars();
-            value = envVars.expand(value);
-
             FilePath someWorkspace = project.getSomeWorkspace();
-            if(value.contains("${WORKSPACE}")){
-                value = value.replace("${WORKSPACE}", someWorkspace.getRemote());
+            if(value.contains(Constants.ENV_VARS_WORKSPACE)){
+                value = value.replace(Constants.ENV_VARS_WORKSPACE, someWorkspace.getRemote());
             }
 
             File file = new File(value);
