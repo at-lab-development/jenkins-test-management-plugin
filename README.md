@@ -47,6 +47,7 @@ need to set some advanced options. You will need to hit the **Advanced** button 
 ![Advanced button](/images/readme_file_02.jpg)
 
 After that you can specify label type (prefix + build date or number) or expiration time period for clean-up function.
+If your test project has generated `target` folder in another location, use `Custom 'target' folder location` option.
 
 ![Additional options](/images/post-build-action-full.jpg)
 
