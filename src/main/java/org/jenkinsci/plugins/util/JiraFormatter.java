@@ -144,11 +144,13 @@ public class JiraFormatter {
         }
         contentBuilder.append(color(issue.getStatus(), statusColor)).append(LINE_SEPARATOR);
 
+        List<String> storedAttachments = issue.getAttachments();
+
         if (issue.getSummary() != null) {
             contentBuilder.append(strong("Summary:")).append(" ");
             String summary = replaceLineSeparator(replaceDoubleQuotes(issue.getSummary()));
-            if (issue.getAttachments() != null) {
-                contentBuilder.append(replaceLinks(summary, issue.getAttachments()));
+            if (storedAttachments != null && !storedAttachments.isEmpty()) {
+                contentBuilder.append(replaceLinks(summary, storedAttachments));
             } else
                 contentBuilder.append(summary);
             contentBuilder.append(LINE_SEPARATOR);
@@ -157,14 +159,16 @@ public class JiraFormatter {
         if (issue.getTime() != null)
             contentBuilder.append(strong("Time elapsed:")).append(" ").append(issue.getTime()).append(LINE_SEPARATOR);
 
-        if (issue.getParameters() != null) {
+        List<Parameter> storedParameters = issue.getParameters();
+
+        if (storedParameters != null && !storedParameters.isEmpty()) {
             contentBuilder.append(LINE_SEPARATOR).append(strong("Parameters")).append(LINE_SEPARATOR)
-                    .append(twoColumnTable("Title", "Value", issue.getParameters()));
+                    .append(twoColumnTable("Title", "Value", storedParameters));
         }
 
-        if (issue.getAttachments() != null) {
+        if (storedAttachments != null && !storedAttachments.isEmpty()) {
             List<Parameter> attachments = new ArrayList<>();
-            for (String attachment : issue.getAttachments()) {
+            for (String attachment : storedAttachments) {
                 String link = filesToJiraLinks.get(attachment);
                 String name = extractFileName(attachment);
                 boolean system = name.matches("(?:stacktrace|scr).\\d{4}-\\d{2}-\\d{2}T.*");
