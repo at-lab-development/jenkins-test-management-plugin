@@ -1,11 +1,17 @@
 # Jenkins Test Management Plugin
 This plugin updates Jira issues with basic build information and useful artifacts (titled values, user defined files, screenshoots, stack traces).
 
-## How it works
+## How it works with Java
 
 The key thing is that this plugin are working in tandem with [Test Management Adapter] which is the Maven dependency providing data gathering possibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
 
 ![Scheme](/images/readme_main_scheme.jpg)
+
+## How it works with .NET
+
+This plugin are working in tandem with [Test Management Adapter for .NET] wich provides data gathering possibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
+
+![Scheme](/images/readme_main_scheme_NET.jpg)
 
 ## Installing a plugin
 
@@ -48,7 +54,7 @@ need to set some advanced options. You will need to hit the **Advanced** button 
 
 After that you can specify label type (prefix + build date or number) or expiration time period for clean-up function.
 If your test project has generated `target` folder in another location, use `Custom 'target' folder location` option.
-IMPORTANT: if the project already contains subforlder/package with name "workspace", it is MANDATORY to use `Custom 'target' folder location` option for MSTest due to folder processing specifics implementation for this framework
+**IMPORTANT**: if the project already contains subforlder/package with name "workspace", it is **MANDATORY** to use `Custom 'target' folder location` option for MSTest due to folder processing specifics implementation for this framework
 
 ![Additional options](/images/post-build-action-full.jpg)
 
@@ -59,5 +65,6 @@ The Test result report is placed as Jira comment. Only build and status fields a
 ![Report example](/images/readme_file_04.jpg)
 
 [Test Management Adapter]: https://github.com/teo-rakan/test-management-adapter.git
+[Test Management Adapter for .NET]: https://git.epam.com/Ivan_Zakhartchouk/test-management-nadapter
 [Jira Text Formatting Notation]: https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
 
