@@ -3,13 +3,13 @@ This plugin updates Jira issues with basic build information and useful artifact
 
 ## How it works with Java
 
-The key thing is that this plugin are working in tandem with [Test Management Adapter] which is the Maven dependency providing data gathering possibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
+This plugin works in tandem with [Test Management Adapter] which is the Maven dependency providing data gathering possibilities for your test framework. This plugin is responsible for `jira-tm-report.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
 
 ![Scheme](/images/readme_main_scheme.jpg)
 
 ## How it works with .NET
 
-This plugin are working in tandem with [Test Management Adapter for .NET] wich provides data gathering possibilities for your test framework. This plugin is responsible for `tm-testng.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
+This plugin works in tandem with [Test Management Adapter for .NET] which provides data gathering possibilities for your test framework. This plugin is responsible for `jira-tm-report.xml` parsing, report generating in accordance with [Jira Text Formatting Notation] and its publishing in corresponding issue comments via REST API.
 
 ![Scheme](/images/readme_main_scheme_NET.jpg)
 
