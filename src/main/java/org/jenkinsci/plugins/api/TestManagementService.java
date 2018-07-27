@@ -77,7 +77,7 @@ public class TestManagementService {
                 //Remove all attachments
                 Matcher attachmentsMatcher = attachmentIdPattern.matcher(comment.getBody());
                 while (attachmentsMatcher.find()) {
-                    int attachmentId = Integer.valueOf(attachmentsMatcher.group());
+                    int attachmentId = Integer.parseInt(attachmentsMatcher.group());
                     if (jira.removeAttachment(attachmentId)) attachmentCounter++;
                 }
 
