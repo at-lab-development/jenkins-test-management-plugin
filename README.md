@@ -29,6 +29,13 @@ At this time, Test Management plugin installation is possible only **manually**.
 
 Once a plugin file has been uploaded, the Jenkins master must be manually restarted in order for the changes to take effect.
 
+### How to generate `.hpi` archive from source code:
+
+1. Download source code test-management-jenkins-plugin;
+2. Click right mouse button on pom.xml, "Maven" > "Generate Sources and Update Folders" (for Intellej IDEA) for Messages class auto-generating (it will be placed in work directory);
+3. Run maven compile;
+4. "Test-management.hpi" will be placed in target directory.
+
 ### On the master
 
 Assuming a `.hpi` file has been explicitly downloaded by a systems administrator, the administrator can manually place the .hpi file in a specific location on the file system.
