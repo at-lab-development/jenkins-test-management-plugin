@@ -44,7 +44,7 @@ import java.util.Map;
 class JiraService {
     private final static String JIRA_API_RELATIVE_PATH = "rest/api/2";
     private final static String TEST_MANAGEMENT_RELATIVE_PATH = "rest/tm/1.0";
-    private final int HTTP_CLIENT_TIMEOUT_SECONDS = 15;
+    private final static int HTTP_CLIENT_TIMEOUT_SECONDS = 15;
 
     private final String username;
     private final String password;
