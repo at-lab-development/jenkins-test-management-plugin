@@ -88,7 +88,7 @@ public class ResultsRecorder extends Recorder {
             File[] rootDir = new File(workspace).listFiles();
             for (File file : rootDir) {
                 if (file.isDirectory() && !file.isHidden()) {
-                    xml = new File(file.getAbsolutePath() + Constants.TEST_RESULTS_FILE_PATH);
+                    xml = new File(file.getAbsolutePath() + Constants.TEST_RESULTS_FILE_NAME);
                     if (xml.exists()) {
                         break;
                     }
