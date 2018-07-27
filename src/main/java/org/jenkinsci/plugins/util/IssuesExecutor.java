@@ -45,7 +45,7 @@ public class IssuesExecutor {
         Date expirationDate = null;
         if (dateCriteria != null && deleteCriteria != null) {
             Calendar calendar = Calendar.getInstance();
-            calendar.add(Integer.valueOf(dateCriteria), -Integer.parseInt(deleteCriteria));
+            calendar.add(Integer.parseInt(dateCriteria), -Integer.parseInt(deleteCriteria));
             expirationDate = calendar.getTime();
         }
 
