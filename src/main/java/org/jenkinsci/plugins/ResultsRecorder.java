@@ -79,11 +79,25 @@ public class ResultsRecorder extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
         PrintStream logger = listener.getLogger();
-        String workspace = resolveWorkspacePath(build, listener);
+        String workspace = null;
+        File xml = null;
+        try {
+            workspace = build.getProject().getSomeWorkspace().getRemote();
+            File[] rootDir = new File(workspace).listFiles();
+            for (File file : rootDir) {
+                if (file.isDirectory() && !file.isHidden()) {
+                    xml = new File(file.getAbsolutePath() + Constants.TEST_RESULTS_FILE_PATH);
+                    if (xml.exists()) {
+                        break;
+                    }
+                }
+            }
+        } catch (NullPointerException e) {
+            logger.append(e.toString());
+        }
         int buildNumber = build.number;
-        File xml = new File(workspace + Constants.TEST_RESULTS_FILE_PATH);
         String formattedLabel = null;
         String deleteCriteria = null;
         String dateCriteria = null;
@@ -164,12 +178,12 @@ public class ResultsRecorder extends Recorder {
         }
 
         String workspaceParameter = getWorkspacePath();
-        if(workspaceParameter == null){
+        if (workspaceParameter == null) {
             return workspace;
         }
 
-        if (workspaceParameter.startsWith("\"") && workspaceParameter.endsWith("\"")){
-            workspaceParameter = workspaceParameter.substring(1, workspaceParameter.length()-1).trim();
+        if (workspaceParameter.startsWith("\"") && workspaceParameter.endsWith("\"")) {
+            workspaceParameter = workspaceParameter.substring(1, workspaceParameter.length() - 1).trim();
         }
 
         final EnvVars env = build.getEnvironment(listener);
@@ -263,24 +277,24 @@ public class ResultsRecorder extends Recorder {
                 return FormValidation.ok();
             }
 
-            if(value.length() == 0){
+            if (value.length() == 0) {
                 return FormValidation.error(Messages.FormValidation_EmptyWorkspacePath());
             }
 
-            if (value.startsWith("\"") && value.endsWith("\"")){
-                value = value.substring(1, value.length()-1).trim();
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1).trim();
             }
 
             FilePath someWorkspace = project.getSomeWorkspace();
-            if(value.contains(Constants.ENV_VARS_WORKSPACE)){
+            if (value.contains(Constants.ENV_VARS_WORKSPACE)) {
                 value = value.replace(Constants.ENV_VARS_WORKSPACE, someWorkspace.getRemote());
             }
 
             File file = new File(value);
-            if(!file.exists()){
+            if (!file.exists()) {
                 return FormValidation.error(Messages.FormValidation_SpecifiedFolderNotFound());
             }
-            
+
             return FormValidation.ok();
         }
     }
