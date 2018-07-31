@@ -79,24 +79,11 @@ public class ResultsRecorder extends Recorder {
     }
 
     @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) {
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
-        String workspace = null;
-        File xml = null;
-        try {
-            workspace = build.getProject().getSomeWorkspace().getRemote();
-            File[] rootDir = new File(workspace).listFiles();
-            for (File file : rootDir) {
-                if (file.isDirectory() && !file.isHidden()) {
-                    xml = new File(file.getAbsolutePath() + Constants.TEST_RESULTS_FILE_NAME);
-                    if (xml.exists()) {
-                        break;
-                    }
-                }
-            }
-        } catch (NullPointerException e) {
-            logger.append(e.toString());
-        }
+        String workspace = resolveWorkspacePath(build, listener);
+        File xml = findResultFile(workspace, logger);
+
         int buildNumber = build.number;
         String formattedLabel = null;
         String deleteCriteria = null;
@@ -190,6 +177,28 @@ public class ResultsRecorder extends Recorder {
         workspace = env.expand(workspaceParameter);
 
         return workspace;
+    }
+
+    private File findResultFile(String workspace, PrintStream logger) {
+        File xml = null;
+        if (isWorkspacePathEnabled()) {
+            xml = new File(workspace + Constants.TEST_RESULTS_FILE_PATH);
+        } else {
+            try {
+                File[] rootDir = new File(workspace).listFiles();
+                for (File file : rootDir) {
+                    if (file.isDirectory() && !file.isHidden()) {
+                        xml = new File(file.getAbsolutePath() + Constants.TEST_RESULTS_FILE_NAME);
+                        if (xml.exists()) {
+                            break;
+                        }
+                    }
+                }
+            } catch (NullPointerException e) {
+                logger.append(e.toString());
+            }
+        }
+        return xml;
     }
 
     @Extension

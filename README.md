@@ -60,8 +60,7 @@ need to set some advanced options. You will need to hit the **Advanced** button 
 ![Advanced button](/images/readme_file_02.jpg)
 
 After that you can specify label type (prefix + build date or number) or expiration time period for clean-up function.
-If your test project has generated `target` folder in another location, use `Custom 'target' folder location` option.
-**IMPORTANT**: if the project already contains subforlder/package with name "workspace", it is **MANDATORY** to use `Custom 'target' folder location` option for MSTest due to folder processing specifics implementation for this framework
+By default this plugin will search result files automatically. But if you wish to set the exact place to read results use `Custom 'target' folder location` option.
 
 ![Additional options](/images/post-build-action-full.jpg)
 
