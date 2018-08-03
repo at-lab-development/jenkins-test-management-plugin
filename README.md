@@ -70,7 +70,7 @@ The Test result report is placed as Jira comment. Only build and status fields a
 
 ![Report example](/images/readme_file_04.jpg)
 
-[Test Management Adapter]: https://github.com/teo-rakan/test-management-adapter.git
-[Test Management Adapter for .NET]: https://git.epam.com/Ivan_Zakhartchouk/test-management-nadapter
+[Test Management Adapter]: https://github.com/at-lab-development/adapter-java-sources
+[Test Management Adapter for .NET]: https://github.com/at-lab-development/adapter-.net-source
 [Jira Text Formatting Notation]: https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa?section=all
 
