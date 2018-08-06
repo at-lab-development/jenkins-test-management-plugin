@@ -19,7 +19,7 @@ At this time, Test Management plugin installation is possible only **manually**.
 
 ### From the web UI
 
-1. Download `.hpi` archive or build it from source code.
+1. [Download](https://github.com/at-lab-development/jenkins-test-management-plugin/blob/master/ready-to-use_test-management.hpi/test-management.hpi) `.hpi` archive or build it from source code.
 1. Navigate to the `Manage Jenkins` > `Manage Plugins` page in the web UI.
 1. Click on the `Advanced` tab.
 1. Choose the `.hpi` file under the `Upload Plugin` section.
