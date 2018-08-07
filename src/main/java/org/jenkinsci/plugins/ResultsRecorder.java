@@ -82,7 +82,8 @@ public class ResultsRecorder extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         String workspace = resolveWorkspacePath(build, listener);
-        File xml = findResultFile(workspace);
+
+        File xml = resultFile.find(workspace);
 
         int buildNumber = build.number;
         String formattedLabel = null;
@@ -179,17 +180,25 @@ public class ResultsRecorder extends Recorder {
         return workspace;
     }
 
-    private File findResultFile(String directory) {
-        File[] filesArray = new File(directory).listFiles();
-        for (File file : filesArray) {
-            if (file.isDirectory() && !file.isHidden()) {
-                findResultFile(file.getAbsolutePath());
-            }
-            if (file.getAbsolutePath().endsWith(Constants.TEST_RESULTS_FILE_NAME)) {
-                return file;
+    private static class resultFile {
+        private static String path;
+
+        private static void getPath(String directory){
+            File[] filesArray = new File(directory).listFiles();
+            for (File file : filesArray) {
+                if (file.isDirectory() && !file.isHidden()) {
+                    getPath(file.getAbsolutePath());
+                }
+                if (file.getAbsolutePath().endsWith(Constants.TEST_RESULTS_FILE_NAME)) {
+                    resultFile.path = file.getAbsolutePath();
+                }
             }
         }
-        return null;
+
+        private static File find(String directory){
+            getPath(directory);
+            return new File(path);
+        }
     }
 
     @Extension
