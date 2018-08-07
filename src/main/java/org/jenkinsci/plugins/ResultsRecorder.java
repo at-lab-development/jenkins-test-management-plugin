@@ -82,7 +82,7 @@ public class ResultsRecorder extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         String workspace = resolveWorkspacePath(build, listener);
-        File xml = findResultFile(workspace, logger);
+        File xml = findResultFile(workspace);
 
         int buildNumber = build.number;
         String formattedLabel = null;
@@ -179,26 +179,17 @@ public class ResultsRecorder extends Recorder {
         return workspace;
     }
 
-    private File findResultFile(String workspace, PrintStream logger) {
-        File xml = null;
-        if (isWorkspacePathEnabled()) {
-            xml = new File(workspace + Constants.TEST_RESULTS_FILE_PATH);
-        } else {
-            try {
-                File[] rootDir = new File(workspace).listFiles();
-                for (File file : rootDir) {
-                    if (file.isDirectory() && !file.isHidden()) {
-                        xml = new File(file.getAbsolutePath() + Constants.TEST_RESULTS_FILE_NAME);
-                        if (xml.exists()) {
-                            break;
-                        }
-                    }
-                }
-            } catch (NullPointerException e) {
-                logger.append(e.toString());
+    private File findResultFile(String directory) {
+        File[] filesArray = new File(directory).listFiles();
+        for (File file : filesArray) {
+            if (file.isDirectory() && !file.isHidden()) {
+                findResultFile(file.getAbsolutePath());
+            }
+            if (file.getAbsolutePath().endsWith(Constants.TEST_RESULTS_FILE_NAME)) {
+                return file;
             }
         }
-        return xml;
+        return null;
     }
 
     @Extension
