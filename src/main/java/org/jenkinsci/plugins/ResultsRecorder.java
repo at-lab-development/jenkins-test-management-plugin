@@ -82,8 +82,7 @@ public class ResultsRecorder extends Recorder {
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws IOException, InterruptedException {
         PrintStream logger = listener.getLogger();
         String workspace = resolveWorkspacePath(build, listener);
-
-        File xml = resultFile.find(workspace);
+        File xml = new File(workspace + Constants.TEST_RESULTS_FILE_PATH);
 
         int buildNumber = build.number;
         String formattedLabel = null;
@@ -159,7 +158,8 @@ public class ResultsRecorder extends Recorder {
     }
 
     public String resolveWorkspacePath(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
-        String workspace = build.getProject().getSomeWorkspace().getRemote();
+        String initialWorkspace = build.getProject().getSomeWorkspace().getRemote();
+        String workspace = resultsLocation.findTargetFolderWithResultFile(initialWorkspace);
 
         if (!isWorkspacePathEnabled()) {
             return workspace;
@@ -180,24 +180,24 @@ public class ResultsRecorder extends Recorder {
         return workspace;
     }
 
-    private static class resultFile {
-        private static String path;
+    private static class resultsLocation {
+        private static String targetFolderPath;
 
-        private static void getPath(String directory){
+        private static void findTargetFolder(String directory) {
             File[] filesArray = new File(directory).listFiles();
             for (File file : filesArray) {
                 if (file.isDirectory() && !file.isHidden()) {
-                    getPath(file.getAbsolutePath());
+                    findTargetFolder(file.getAbsolutePath());
                 }
-                if (file.getAbsolutePath().endsWith(Constants.TEST_RESULTS_FILE_NAME)) {
-                    resultFile.path = file.getAbsolutePath();
+                if (file.getAbsolutePath().endsWith(Constants.TEST_RESULTS_FILE_PATH)) {
+                    targetFolderPath = file.getParentFile().getParent();
                 }
             }
         }
 
-        private static File find(String directory){
-            getPath(directory);
-            return new File(path);
+        private static String findTargetFolderWithResultFile(String workspace) {
+            findTargetFolder(workspace);
+            return targetFolderPath;
         }
     }
 
