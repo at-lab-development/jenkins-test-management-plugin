@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.util;
 
+
 import org.jenkinsci.plugins.api.TestManagementService;
 import org.jenkinsci.plugins.entity.Issue;
 import org.jenkinsci.plugins.entity.Issues;
@@ -23,6 +24,7 @@ import java.util.List;
 public class IssuesExecutor {
     private final TestManagementService service;
     private final PrintStream logger;
+    private final static String TARGET_DIR = "\\target\\";
 
     public IssuesExecutor(TestManagementService service, PrintStream logger) {
         this.service = service;
@@ -56,12 +58,17 @@ public class IssuesExecutor {
                 if (expirationDate != null) service.removeExpiredComments(issue.getIssueKey(), expirationDate);
                 logger.println();
             }
+
         } catch (IOException e) {
             logger.println("Cannot update issues. Error message: " + e.getMessage());
         }
     }
 
     public void execute(File file, String deleteCriteria, String dateCriteria, String label) {
-        execute(parse(file), deleteCriteria, dateCriteria, label);
+        List<Issue> iResult = parse(file);
+        if (iResult != null) {
+            execute(iResult, deleteCriteria, dateCriteria, label);
+        }
     }
+
 }

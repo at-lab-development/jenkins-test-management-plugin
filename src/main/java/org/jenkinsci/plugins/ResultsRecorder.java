@@ -13,6 +13,7 @@ import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import org.apache.commons.io.FileUtils;
 import org.jenkinsci.plugins.api.TestManagementService;
 import org.jenkinsci.plugins.util.IssuesExecutor;
 import org.jenkinsci.plugins.util.Label;
@@ -104,6 +105,12 @@ public class ResultsRecorder extends Recorder {
 
         service = new TestManagementService(getJiraUrl(), getUsername(), getPassword(), workspace, buildNumber, logger);
         new IssuesExecutor(service, logger).execute(xml, deleteCriteria, dateCriteria, formattedLabel);
+
+        if (xml.exists()) {
+            FileUtils.copyFile(xml, new File(workspace + Constants.TEST_RESULTS_COPY_FILE_PATH));
+            logger.println("Test results were saved into : " + workspace + Constants.TEST_RESULTS_COPY_FILE_PATH);
+            FileUtils.deleteQuietly(xml);
+        }
 
         return true;
     }
